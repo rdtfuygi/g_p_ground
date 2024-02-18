@@ -89,6 +89,7 @@
     <CudaCompile Include="line.cu" />
     <CudaCompile Include="point.cu" />
     <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="poly.cu" />
     <CudaCompile Include="ray.cu" />
     <CudaCompile Include="seg.cu" />
     <CudaCompile Include="vector.cu" />

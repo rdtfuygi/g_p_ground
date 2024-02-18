@@ -22,3 +22,8 @@ __host__ __device__ double& point::operator[](int i)
 {
 	return locat[i & 1];
 }
+
+__host__ __device__ double point::operator[](int i) const
+{
+	return locat[i & 1];
+}
