@@ -10,7 +10,7 @@ __host__ __device__ vector::vector(point 点) : point(点) {};
 
 __host__ __device__ vector::vector(double 方向[2], double 长度)
 {
-	double 比例 = 长度 / length({ 0,0 }, 方向);
+	double 比例 = 长度 / ::length({ 0,0 }, 方向);
 	locat[0] = 方向[0] * 比例;
 	locat[1] = 方向[1] * 比例;
 }

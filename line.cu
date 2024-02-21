@@ -35,6 +35,18 @@ __host__ __device__ line line::rotate(const point 点, double 角度, bool rad) con
 	return line(::rotate(点, origin, 角度, rad), dir.rotate(角度, rad));
 }
 
+__host__ __device__ double line::point_dist(const point 点) const
+{
+	line temp;
+	temp.origin = 点;
+	temp.dir[0] = dir[1];
+	temp.dir[1] = -dir[0];
+
+	double t_1, t_2;
+	cross(*this, temp, t_1, t_2);
+	return abs(t_2);
+}
+
 
 __host__ __device__ void cross(const line l_1, const line l_2, double& t_1, double& t_2)
 {

@@ -20,6 +20,29 @@ __host__ __device__ seg seg::rotate(const point 点, double 角度, bool rad) const
 	return seg(::rotate(点, origin, 角度, rad), dir.rotate(角度, rad));
 }
 
+__host__ __device__ double seg::point_dist(const point 点) const
+{
+	line temp;
+	temp.origin = 点;
+	temp.dir[0] = dir[1];
+	temp.dir[1] = -dir[0];
+
+	double t_1, t_2;
+	cross(*this, temp, t_1, t_2);
+	if (t_1 < 0)
+	{
+		return length(点, origin);
+	}
+	else if (t_1 > dist)
+	{
+		return length(点, end());
+	}
+	else
+	{
+		return abs(t_2);
+	}
+}
+
 
 __host__ __device__ void cross(const seg l_1, const line l_2, double& t_1, double& t_2)
 {
@@ -121,4 +144,15 @@ __host__ __device__ bool is_cross(const seg l_1, const seg l_2)
 	vector c = vector(l_1.origin) - vector(l_2.origin);
 	vector d = vector(l_1.end()) - vector(l_2.origin);
 	return ((a ^ b) < 0) && ((c ^ d) < 0);
+}
+
+__host__ __device__ bool is_cross(const seg l_1, const ray l_2)
+{
+	double t_1, t_2;
+	cross(l_1, l_2, t_1, t_2);
+	if (t_1 != DBL_MAX)
+	{
+		return true;
+	}
+	return false;
 }
