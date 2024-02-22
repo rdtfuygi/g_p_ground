@@ -32,6 +32,22 @@ poly::poly(std::vector<point>& µã)
 	segs[20 - 1] = seg(µã[temp - 1], µã[0]);
 }
 
+__host__ __device__ bool poly::legal()
+{
+	reset_seg();
+	for (int i = 0; i < 20; i++)
+	{
+		for (int j = 0; j < i; j++)
+		{
+			if (is_cross(segs[i], segs[j]))
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 __host__ __device__ void poly::point_get(point*& µã) const
 {
 	if (µã != nullptr)
@@ -157,6 +173,15 @@ __host__ __device__ double poly::area() const
 	}
 	s += vector(segs[20 - 1].origin) ^ vector(segs[0].origin);
 	return s / 2;
+}
+
+void poly::print(cv::InputOutputArray Í¼Ïñ, double ±ÈÀý, const cv::Scalar& ÑÕÉ«, int ´ÖÏ¸) const
+{
+	for (int i = 0; i < 19; i++)
+	{
+		seg(segs[i].origin, segs[i + 1].origin).print(Í¼Ïñ, ±ÈÀý, ÑÕÉ«, ´ÖÏ¸);
+	}
+	seg(segs[19].origin, segs[0].origin).print(Í¼Ïñ, ±ÈÀý, ÑÕÉ«, ´ÖÏ¸);
 }
 
 __host__ __device__ bool poly::is_overlap(const poly other) const

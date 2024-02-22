@@ -4,6 +4,10 @@
 
 #include <stdio.h>
 
+#include "geometry.cuh"
+
+#include "ground.cuh"
+
 cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
 
 __global__ void addKernel(int *c, const int *a, const int *b)
@@ -123,7 +127,12 @@ Error:
 
 int main()
 {
+    srand(123);
 
+
+    ground a;
+    std::vector<building> b(7);
+    
 
     return 0;
 }

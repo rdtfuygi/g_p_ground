@@ -47,6 +47,18 @@ __host__ __device__ double line::point_dist(const point 点) const
 	return abs(t_2);
 }
 
+void line::print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细) const
+{
+	int 高 = 图像.rows(), 宽 = 图像.cols();
+	int 原点_x = 宽 / 2, 原点_y = 高 / 2;
+
+	int 放大 = 2 * (高 > 宽 ? 高 : 宽);
+
+	cv::Point 点_1(origin[0] * 比例 - dir[0] * 放大 + 原点_x, -origin[1] * 比例 + dir[1] * 放大 + 原点_y);
+	cv::Point 点_2(origin[0] * 比例 + dir[0] * 放大 + 原点_x, -origin[1] * 比例 - dir[1] * 放大 + 原点_y);
+	cv::line(图像, 点_1, 点_2, 颜色, 粗细);
+}
+
 
 __host__ __device__ void cross(const line l_1, const line l_2, double& t_1, double& t_2)
 {

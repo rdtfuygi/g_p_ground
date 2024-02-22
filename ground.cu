@@ -22,6 +22,11 @@ __host__ __device__ double ground::area() const
 	return abs(site.area());
 }
 
+void ground::print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细) const
+{
+	site.print(图像, 比例, 颜色, 粗细);
+}
+
 
 building::building() :ground(), fun(0), target_area(0) {}
 
@@ -29,21 +34,45 @@ building::building(point 点[20], int 门_1, int 门_2, int 类型, double 目标大小) 
 
 building::building(std::vector<point>& 点, int 门_1, int 门_2, int 类型, double 目标大小) :ground(点, 门_1, 门_2), fun(类型), target_area(目标大小) {}
 
-__host__ __device__ void building::change(vector 移动, int index)
+__host__ __device__ void building::move(vector 移动, int index)
 {
 	site[index].origin = point(vector(site[index].origin) + 移动);
 }
 
+__host__ __device__ void building::move(vector 移动[20])
+{
+	for (int i = 0; i < 20; i++)
+	{
+		move(移动[i], i);
+	}
+	site.reset_seg();
+}
+
+__host__ __device__ void building::change(point 点, int index)
+{
+	site[index].origin = 点;
+}
+
+__host__ __device__ void building::change(point 点[20])
+{
+	for (int i = 0; i < 20; i++)
+	{
+		change(点[i], i);
+	}
+	site.reset_seg();
+}
 
 
-__global__ void building_change(building* 建筑, vector* 移动, int 尺寸)
+
+
+__global__ void building_move(building* 建筑, vector* 移动, int 尺寸)
 {
 	int i = threadIdx.x + blockIdx.x * blockDim.x;
 	if (i >= 尺寸)
 	{
 		return;
 	}
-	建筑[i / 20].change(移动[i], i % 20);
+	建筑[i / 20].move(移动[i], i % 20);
 }
 
 __global__ void building_reset_seg(building* 建筑, int 尺寸)
@@ -66,7 +95,7 @@ void 建筑更改(std::vector<building>& 建筑, std::vector<vector>& 移动)
 		{
 			for (int j = 0; j < 移动.size(); j++)
 			{
-				建筑[i].change(移动[i * 20 + j], j);
+				建筑[i].move(移动[i * 20 + j], j);
 			}
 			建筑[i].site.reset_seg();
 		}
@@ -87,7 +116,7 @@ void 建筑更改(std::vector<building>& 建筑, std::vector<vector>& 移动)
 		cudaMemcpy(建筑_dev, 建筑.data(), sizeof(building) * 建筑.size(), cudaMemcpyHostToDevice);
 		cudaMemcpy(移动_dev, 建筑.data(), sizeof(vector) * 移动.size(), cudaMemcpyHostToDevice);
 
-		building_change << < 块数, 每块线程 >> > (建筑_dev, 移动_dev, 移动.size());
+		building_move << < 块数, 每块线程 >> > (建筑_dev, 移动_dev, 移动.size());
 
 		cudaFree(移动_dev);
 

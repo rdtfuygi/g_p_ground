@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <vector>
+#include <opencv.hpp>
 
 __host__ __device__ double deg2rad(double rad);
 __host__ __device__ double rad2deg(double deg);
@@ -19,6 +20,7 @@ public:
 	__host__ __device__ point(double 位置[2]);
 	__host__ __device__ double& operator[](int i);
 	__host__ __device__ double operator[](int i) const;
+	void print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
 };
 
 __host__ __device__ double length(double 点_1_x, double 点_1_y, double 点_2_x, double 点_2_y);
@@ -48,6 +50,8 @@ public:
 	__host__ __device__ vector rotate(double 角度, bool rad = false) const;
 
 	__host__ __device__ double angle_get(bool rad = false) const;
+
+	void print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
 };
 
 __host__ __device__ double operator * (vector 向量_1, vector 向量_2);
@@ -72,6 +76,8 @@ public:
 	__host__ __device__ double angle_get(bool rad = false) const;
 	__host__ __device__ line rotate(const point 点, double 角度, bool rad = false) const;
 	__host__ __device__ double point_dist(const point 点) const;
+
+	void print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
 };
 
 class ray :public line
@@ -85,6 +91,7 @@ public:
 	__host__ __device__ ray rotate(const point 点, double 角度, bool rad = false) const;
 	__host__ __device__ double point_dist(const point 点) const;
 
+	void print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
 };
 
 class seg :public ray
@@ -99,6 +106,8 @@ public:
 	__host__ __device__ point end() const;
 	__host__ __device__ seg rotate(const point 点, double 角度, bool rad = false) const;
 	__host__ __device__ double point_dist(const point 点) const;
+
+	void print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
 };
 
 __host__ __device__ void cross(const line l_1, const line l_2, double& t_1, double& t_2);
@@ -133,6 +142,8 @@ public:
 	__host__ __device__ poly(const point* 点, int m = 20);
 	poly(std::vector<point>& 点);
 
+	__host__ __device__ bool legal();
+
 	__host__ __device__ void point_get(point*& 点) const;
 	void point_get(std::vector<point>& 点) const;
 	__host__ __device__ void seg_get(seg*& 线段) const;
@@ -152,23 +163,12 @@ public:
 	__host__ __device__ seg operator[](int i) const;
 
 	__host__ __device__ double area() const;
+
+	void print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
 };
 
 __host__ __device__ bool is_overlap(const poly p_1, const poly p_2);
 
 __host__ __device__ double dist(const poly p_1, const poly p_2);
-
-//class triangle :poly<3>
-//{
-//public:
-//	__host__ __device__ triangle();
-//	__host__ __device__ triangle(point* 点);
-//	__host__ __device__ triangle(seg* 线段);
-//};
-
-//class rect :poly<4>
-//{
-//
-//};
 
 

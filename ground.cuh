@@ -22,7 +22,7 @@ public:
 
 	__host__ __device__ double area() const;
 
-	
+	void print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
 };
 
 const int fun_port = 0;
@@ -42,7 +42,12 @@ public:
 	__host__ __device__ building();
 	__host__ __device__ building(point 点[20], int 门_1, int 门_2, int 类型, double 目标大小);
 	building(std::vector<point>& 点, int 门_1, int 门_2, int 类型, double 目标大小);
-	__host__ __device__ void change(vector 移动, int index);
+	__host__ __device__ void move(vector 移动, int index);
+	__host__ __device__ void move(vector 移动[20]);
+	__host__ __device__ void change(point 点, int index);
+	__host__ __device__ void change(point 点[20]);
+
+
 };
 
 

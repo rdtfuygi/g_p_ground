@@ -83,6 +83,18 @@ __host__ __device__ double vector::angle_get(bool rad) const
 	return 角度;
 }
 
+void vector::print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细) const
+{
+	int 高 = 图像.rows(), 宽 = 图像.cols();
+	int 原点_x = 宽 / 2, 原点_y = 高 / 2;
+
+	int 放大 = 2 * (高 > 宽 ? 高 : 宽);
+
+	cv::Point 点_1(原点_x, 原点_y);
+	cv::Point 点_2(locat[0] * 比例 + 原点_x, -locat[1] * 比例  + 原点_y);
+	cv::line(图像, 点_1, 点_2, 颜色, 粗细);
+}
+
 __host__ __device__ vector operator+(vector 向量_1, vector 向量_2)
 {
 	return vector(向量_1[0] + 向量_2[0], 向量_1[1] + 向量_2[1]);
