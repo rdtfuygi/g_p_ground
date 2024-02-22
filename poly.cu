@@ -39,7 +39,9 @@ __host__ __device__ bool poly::legal()
 	{
 		for (int j = 0; j < i; j++)
 		{
-			if (is_cross(segs[i], segs[j]))
+			double t_1, t_2;
+			cross(segs[i], segs[j], t_1, t_2);
+			if ((t_1 != DBL_MAX) && (((abs(t_1 - segs[i].dist) > 0.01) && (abs(t_1) > 0.01)) || ((abs(t_2 - segs[j].dist) > 0.01) && (abs(t_2) > 0.01))))
 			{
 				return false;
 			}
@@ -182,6 +184,30 @@ void poly::print(cv::InputOutputArray Í¼Ïñ, double ±ÈÀý, const cv::Scalar& ÑÕÉ«,
 		seg(segs[i].origin, segs[i + 1].origin).print(Í¼Ïñ, ±ÈÀý, ÑÕÉ«, ´ÖÏ¸);
 	}
 	seg(segs[19].origin, segs[0].origin).print(Í¼Ïñ, ±ÈÀý, ÑÕÉ«, ´ÖÏ¸);
+}
+
+vector poly::move2center()
+{
+	int n = 0;
+	vector move(0.0, 0.0);
+	for (int i = 0; i < 19; i++)
+	{
+		if ((abs(segs[i].origin[0] - segs[19].origin[0]) > 0.00001) || (abs(segs[i].origin[1] - segs[19].origin[1]) > 0.00001))
+		{
+			move -= vector(segs[i].origin);
+			n++;
+		}
+	}
+	move -= vector(segs[19].origin);
+	n++;
+
+	move /= n;
+	for (int i = 0; i < 20; i++)
+	{
+		segs[i].origin = point(vector(segs[i].origin) + move);
+	}
+
+	return move;
 }
 
 __host__ __device__ bool poly::is_overlap(const poly other) const

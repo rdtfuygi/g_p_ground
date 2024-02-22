@@ -1,4 +1,5 @@
 #pragma once
+#define _USE_MATH_DEFINES 
 
 #ifndef geometry
 #define geometry
@@ -8,8 +9,10 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
+
 #include <cmath>
 #include <vector>
+#include <opencv.hpp>
 
 class ground
 {
@@ -32,6 +35,7 @@ const int fun_cold = 3;
 const int fun_freezing = 4;
 const int fun_adm = 5;
 const int fun_live = 6;
+const int fun_port_2 = 7;
 
 
 class building :public ground
@@ -56,3 +60,7 @@ void 建筑更改(std::vector<building>& 建筑, std::vector<vector>& 移动);
 building 停车场设置(building 分拣区);
 
 double 奖励函数(ground 场地, std::vector<building>& 建筑);
+
+void 仓库面积_计算(std::vector<double>& 仓库面积, std::vector<double>& 补货点_, std::vector<double>& 订货批量_, std::vector<char>& 库存类型, std::vector<double>& 仓库限高);
+
+void 面积设定(std::vector<building>& 建筑, double 总需求, std::vector<double>& 仓库面积);

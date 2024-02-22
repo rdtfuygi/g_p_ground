@@ -165,6 +165,8 @@ public:
 	__host__ __device__ double area() const;
 
 	void print(cv::InputOutputArray Í¼Ïñ, double ±ÈÀý, const cv::Scalar& ÑÕÉ«, int ´ÖÏ¸ = 1) const;
+
+	vector move2center();
 };
 
 __host__ __device__ bool is_overlap(const poly p_1, const poly p_2);

@@ -105,6 +105,7 @@
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
     </CudaCompile>
+    <CudaCompile Include="other.cu" />
     <CudaCompile Include="pipe.cu" />
     <CudaCompile Include="point.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
@@ -134,6 +135,7 @@
   <ItemGroup>
     <ClInclude Include="geometry.cuh" />
     <ClInclude Include="ground.cuh" />
+    <ClInclude Include="other.cuh" />
     <ClInclude Include="pipe.cuh" />
   </ItemGroup>
   <ItemGroup>

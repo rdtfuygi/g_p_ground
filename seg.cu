@@ -91,15 +91,15 @@ __host__ __device__ void cross(const seg l_1, const seg l_2, double& t_1, double
 	point end_1 = l_1.end();
 	point end_2 = l_2.end();
 	if ((fmin(l_1.origin[0], end_1[0]) > fmax(l_2.origin[0], end_2[0])) ||
-		(fmin(l_2.origin[1], end_2[1]) > fmax(l_1.origin[1], end_1[1])) ||
-		(fmin(l_1.origin[0], end_1[0]) > fmax(l_2.origin[0], end_2[0])) ||
+		(fmin(l_1.origin[1], end_1[1]) > fmax(l_2.origin[1], end_2[1])) ||
+		(fmin(l_2.origin[0], end_2[0]) > fmax(l_1.origin[0], end_1[0])) ||
 		(fmin(l_2.origin[1], end_2[1]) > fmax(l_1.origin[1], end_1[1])))
 	{
 		t_2 = DBL_MAX;
 		t_1 = DBL_MAX;
 		return;
 	}
-	cross(line(l_1), line(l_2), t_2, t_1);
+	cross(line(l_1), line(l_2), t_1, t_2);
 	if ((0 > t_2) || (t_2 > l_2.dist) || (0 > t_1) || (t_1 > l_1.dist))
 	{
 		t_2 = DBL_MAX;
@@ -151,11 +151,13 @@ __host__ __device__ point cross(const seg l_1, const seg l_2)
 
 __host__ __device__ bool is_cross(const seg l_1, const seg l_2)
 {
-	vector a = vector(l_2.origin) - vector(l_1.origin);
-	vector b = vector(l_2.end()) - vector(l_1.origin);
-	vector c = vector(l_1.origin) - vector(l_2.origin);
-	vector d = vector(l_1.end()) - vector(l_2.origin);
-	return ((a ^ b) < 0) && ((c ^ d) < 0);
+	double t_1, t_2;
+	cross(l_1, l_2, t_1, t_2);
+	if (t_1 != DBL_MAX)
+	{
+		return true;
+	}
+	return false;
 }
 
 __host__ __device__ bool is_cross(const seg l_1, const ray l_2)

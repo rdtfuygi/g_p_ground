@@ -1,8 +1,8 @@
-#include "geometry.cuh"
-//#include <numbers>
-#include <limits>
 #define _USE_MATH_DEFINES 
-#include <math.h>
+
+#include "geometry.cuh"
+#include <limits>
+
 
 __host__ __device__ double deg2rad(double rad)
 {

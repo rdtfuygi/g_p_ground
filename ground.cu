@@ -1,7 +1,7 @@
 #include"ground.cuh"
 
-#define _USE_MATH_DEFINES 
-#include <math.h>
+//#define _USE_MATH_DEFINES 
+//#include <cmath>
 
 __host__ __device__ ground::ground() :site(), door() {}
 
@@ -168,14 +168,16 @@ building 停车场设置(building 分拣区)
 
 
 
-const char 关联表[6][6] =
+const char 关联表[8][8] =
 {
-	{0, 4, 2, 2, 0, 0},
-	{4, 0, 0,-1, 0, 0},
-	{2, 0, 0,-1, 0, 0},
-	{2,-1,-1, 0,-1,-1},
-	{0, 0, 0,-1, 0, 3},
-	{0, 0, 0,-1, 3,	0}
+	{0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 4, 2, 2, 0, 0, 0},
+	{0, 4, 0, 0,-1, 0, 0, 0},
+	{0, 2, 0, 0,-1, 0, 0, 0},
+	{0, 2,-1,-1, 0,-1,-1, 0},
+	{0, 0, 0, 0,-1, 0, 3, 4},
+	{0, 0, 0, 0,-1, 3, 0, 4},
+	{0, 0, 0, 0, 0, 4, 4, 0}
 };
 
 
@@ -187,7 +189,8 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑)
 		场地内_权重 = 10000,
 		面积_权重 = -1,
 		平直角_权重 = 10,
-		距离_权重 = 10;
+		距离_权重 = 10,
+		重叠_权重 = 10000;
 
 
 	for (int i = 0; i < 建筑.size(); i++)
@@ -197,23 +200,49 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑)
 			分数 += 场地内_权重;
 		}
 
-		if(建筑[i].fun!=fun_port)
+		for (int j = 0; j < i; j++)
 		{
-			分数 += pow(建筑[i].area() - 建筑[i].target_area, 2) * 面积_权重;
+			if (!建筑[i].site.is_overlap(建筑[j].site))
+			{
+				分数 += 重叠_权重;
+			}
+			分数 += -dist(建筑[i].site, 建筑[j].site) * 距离_权重 * 关联表[建筑[i].fun][建筑[j].fun];
 		}
+
+		分数 += pow(建筑[i].area() - 建筑[i].target_area, 2) * 面积_权重;
 
 		for (int j = 0; j < 20; j++)
 		{
 			分数 += (fmax(abs(建筑[i].site[j].dir * 建筑[i].site[(j + 1) % 20].dir), abs(建筑[i].site[j].dir ^ 建筑[i].site[(j + 1) % 20].dir)) - M_SQRT1_2) * 平直角_权重;
 		}
-
-		for (int j = 0; j < i; j++)
-		{
-			if ((建筑[i].fun != fun_port) && (建筑[j].fun != fun_port))
-			{
-				分数 += -dist(建筑[i].site, 建筑[j].site) * 距离_权重 * 关联表[i][j];
-			}
-		}
 	}
 	return 分数;
+}
+
+void 仓库面积_计算(std::vector<double>& 仓库面积, std::vector<double>& 补货点_, std::vector<double>& 订货批量_, std::vector<char>& 库存类型, std::vector<double>& 仓库限高)
+{
+	仓库面积 = { 0,0,0 };
+	for (int i = 0; i < 补货点_.size(); i++)
+	{
+		仓库面积[库存类型[i]] += (补货点_[i] + 订货批量_[i]) / 仓库限高[库存类型[i]];
+	}
+}
+
+void 面积设定(std::vector<building>& 建筑, double 总需求, std::vector<double>& 仓库面积)
+{
+	建筑 = std::vector<building>(8);
+
+	建筑[0].target_area = 总需求 / 30 / 365 / 24 * 3 * 35;
+	建筑[1].target_area = 总需求 / 30 / 365 / 24 * 3 * 20;
+	建筑[2].target_area = 仓库面积[0] * 1.7;
+	建筑[3].target_area = 仓库面积[1] * 1.7;
+	建筑[4].target_area = 仓库面积[2] * 1.7;
+	建筑[5].target_area = 5000;
+	建筑[6].target_area = 总需求 / 30 / 365 / 24 * (3 + 2) * 10;
+	建筑[7].target_area = (500 * 0.7 + 总需求 / 30 / 365 / 24 * 3 * 0.3) * 40;
+
+	for (int i = 0; i < 建筑.size(); i++)
+	{
+		建筑[0].fun = i;
+	}
 }
