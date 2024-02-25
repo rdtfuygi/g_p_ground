@@ -26,16 +26,19 @@ public:
 	__host__ __device__ double area() const;
 
 	void print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
+
+	void data(std::vector<double>& 数据);
 };
 
-const int fun_port = 0;
-const int fun_sort = 1;
-const int fun_ware = 2;
-const int fun_cold = 3;
-const int fun_freezing = 4;
-const int fun_adm = 5;
-const int fun_live = 6;
-const int fun_port_2 = 7;
+const int 
+	fun_port = 0,
+	fun_sort = 1,
+	fun_ware = 2,
+	fun_cold = 3,
+	fun_freezing = 4,
+	fun_adm = 5,
+	fun_live = 6,
+	fun_port_2 = 7;
 
 
 class building :public ground
@@ -51,7 +54,7 @@ public:
 	__host__ __device__ void change(point 点, int index);
 	__host__ __device__ void change(point 点[20]);
 
-
+	void data(std::vector<double>& 数据);
 };
 
 

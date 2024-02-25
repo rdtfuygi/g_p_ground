@@ -33,5 +33,46 @@ double 补货点(double 年需求量, double 需求方差, double 提前期, double 提前期方差
 	return 提前期 * 年需求量 + norm_quantile(服务水平) * sqrt(提前期 * 需求方差 + pow(年需求量, 2) * 提前期方差);
 }
 
+ground 场地设定(double 面积)
+{
+	ground 输出;
+	while (true)
+	{
+		for (int i = 0; i < 20; i++)
+		{
+			int n = 0;
+			while (true)
+			{
+				输出.site[i].origin = point((double(rand()) / RAND_MAX - 0.5) * sqrt(面积) * 1.4, (double(rand()) / RAND_MAX - 0.5) * sqrt(面积) * 1.4);
+				if (输出.site.legal())
+				{
+					break;
+				}
+				n++;
+
+				if (n > 1000)
+				{
+					输出 = ground();
+					n = 0;
+					i = 0;
+				}
+			}
+		}
+		输出.site.simple(45);
+		输出.site.reset_seg();
+
+		double s = 输出.area();
+
+
+
+		if (输出.site.legal() && (s > 面积))
+		{
+			break;
+		}
+	}
+	return 输出;
+}
+
+
 
 

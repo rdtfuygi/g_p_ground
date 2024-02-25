@@ -6,12 +6,12 @@
 
 __host__ __device__ double deg2rad(double rad)
 {
-	return rad / M_PI * 180;
+	return rad * M_PI / 180;
 }
 
 __host__ __device__ double rad2deg(double deg)
 {
-	return deg * M_PI / 180;
+	return deg / M_PI * 180;
 }
 
 

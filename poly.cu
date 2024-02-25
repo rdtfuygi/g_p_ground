@@ -37,11 +37,11 @@ __host__ __device__ bool poly::legal()
 	reset_seg();
 	for (int i = 0; i < 20; i++)
 	{
-		for (int j = 0; j < i; j++)
+		for (int j = 0; j < 20; j++)
 		{
 			double t_1, t_2;
 			cross(segs[i], segs[j], t_1, t_2);
-			if ((t_1 != DBL_MAX) && (((abs(t_1 - segs[i].dist) > 0.01) && (abs(t_1) > 0.01)) || ((abs(t_2 - segs[j].dist) > 0.01) && (abs(t_2) > 0.01))))
+			if ((t_1 != DBL_MAX) && (((abs(t_1 - segs[i].dist) > 0.0001) && (abs(t_1) > 0.0001)) || ((abs(t_2 - segs[j].dist) > 0.0001) && (abs(t_2) > 0.0001))))
 			{
 				return false;
 			}
@@ -144,11 +144,28 @@ __host__ __device__ bool poly::point_in(point µã) const
 
 __host__ __device__ void poly::reset_seg()
 {
+	for (int i = 0, n = 0; (i < 20 - 1) && (n < 20); i++)
+	{
+		if ((abs(segs[i].origin[0] - segs[i + 1].origin[0]) > 0.001) || (abs(segs[i].origin[1] - segs[i + 1].origin[1]) > 0.001))
+		{
+			continue;
+		}
+		n++;
+		i--;
+		for (int j = i + 1; j < 20 - 1; j++)
+		{
+			segs[j].origin = segs[j + 1].origin;
+		}
+		segs[19].origin = segs[0].origin;
+	}
+	
+
+
 	for (int i = 0; i < 20 - 1; i++)
 	{
 		segs[i] = seg(segs[i].origin, segs[i + 1].origin);
 	}
-	segs[19] = seg(segs[20 - 1].origin, segs[0].origin);
+	segs[19] = seg(segs[19].origin, segs[0].origin);
 }
 
 __host__ __device__ void poly::reset_seg(int i)
@@ -179,35 +196,105 @@ __host__ __device__ double poly::area() const
 
 void poly::print(cv::InputOutputArray Í¼Ïñ, double ±ÈÀý, const cv::Scalar& ÑÕÉ«, int ´ÖÏ¸) const
 {
+	//seg(segs[0].origin, segs[1].origin).print(Í¼Ïñ, ±ÈÀý, ÑÕÉ«, ´ÖÏ¸ * 2);
 	for (int i = 0; i < 19; i++)
 	{
 		seg(segs[i].origin, segs[i + 1].origin).print(Í¼Ïñ, ±ÈÀý, ÑÕÉ«, ´ÖÏ¸);
 	}
 	seg(segs[19].origin, segs[0].origin).print(Í¼Ïñ, ±ÈÀý, ÑÕÉ«, ´ÖÏ¸);
+	//segs[0].origin.print(Í¼Ïñ, ±ÈÀý, ÑÕÉ«, ´ÖÏ¸ * 4);
 }
 
 vector poly::move2center()
 {
-	int n = 0;
-	vector move(0.0, 0.0);
+	reset_seg();
+
+
+	double s = area();
+	double x = 0, y = 0;
 	for (int i = 0; i < 19; i++)
 	{
-		if ((abs(segs[i].origin[0] - segs[19].origin[0]) > 0.00001) || (abs(segs[i].origin[1] - segs[19].origin[1]) > 0.00001))
-		{
-			move -= vector(segs[i].origin);
-			n++;
-		}
+		double »ý = segs[i].dir ^ segs[i + 1].dir;
+		x += (segs[i].origin[0] + segs[i+1].origin[0]) * »ý;
+		y += (segs[i].origin[1] + segs[i+1].origin[1]) * »ý;
 	}
-	move -= vector(segs[19].origin);
-	n++;
+	vector move(x / 6 / s, y / 6 / s);
 
-	move /= n;
+	//for (int i = 0; i < 19; i++)
+	//{
+	//	if ((abs(segs[i].origin[0] - segs[i + 1].origin[0]) > 0.00001) || (abs(segs[i].origin[1] - segs[i + 1].origin[1]) > 0.00001))
+	//	{
+	//		move -= vector(segs[i].origin);
+	//		n++;
+	//	}
+	//}
+	//if ((abs(segs[19].origin[0] - segs[0].origin[0]) > 0.00001) || (abs(segs[19].origin[1] - segs[0].origin[1]) > 0.00001))
+	//{
+	//	move -= vector(segs[19].origin);
+	//	n++;
+	//}
+	//
+	//move /= n;
 	for (int i = 0; i < 20; i++)
 	{
 		segs[i].origin = point(vector(segs[i].origin) + move);
 	}
 
 	return move;
+}
+
+__host__ __device__ void poly::simple(double ½Ç¶È, bool rad)
+{
+	if (!rad)
+	{
+		½Ç¶È = deg2rad(½Ç¶È);
+	}
+	double cos_ = cos(½Ç¶È);
+
+	reset_seg();
+	int n = 1;
+	while (n != 0)	{
+
+		n = 0;
+		for (int i = 0, j = 1; j < 20; j++)
+		{
+			i = j - 1;
+
+			double cos_t = (vector(0.0, 0.0) - segs[i].dir) * segs[j].dir;
+			if ((cos_t > cos_) && (segs[i].dist > 0.0001) && (segs[j].dist > 0.0001))
+			{
+				n++;
+				if (i == 18)
+				{
+					segs[19].origin = segs[0].origin;
+				}
+				for (int k = i + 1; k < 20 - 1; k++)
+				{
+					segs[k].origin = segs[k + 1].origin;
+				}
+				reset_seg();
+			}
+		}
+		vector dir_;
+		for (int i = 19; i >= 0; i--)
+		{
+			if (segs[i].dist > 0.0001)
+			{
+				dir_ = segs[i].dir;
+				break;
+			}
+		}
+		double cos_t = (vector(0.0, 0.0) - dir_) * segs[0].dir;
+		if (cos_t > cos_)
+		{
+			n++;
+			for (int j = 0; j < 20 - 1; j++)
+			{
+				segs[j].origin = segs[j + 1].origin;
+			}
+			reset_seg();
+		}
+	}
 }
 
 __host__ __device__ bool poly::is_overlap(const poly other) const

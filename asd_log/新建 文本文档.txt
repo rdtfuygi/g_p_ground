@@ -1,0 +1,1 @@
+tensorboard --logdir=D:\Users\57247\OneDrive\Desktop\g_p\g_p_group\asd_log --port=6006
