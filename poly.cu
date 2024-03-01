@@ -105,9 +105,9 @@ __host__ __device__ bool poly::point_in(point 点) const
 	for (int i = 1; i < 20 ; i++)
 	{
 		max[0] = (max[0] > segs[i].origin[0]) ? max[0] : segs[i].origin[0];
-		max[1] = (max[1] > segs[i].origin[0]) ? max[1] : segs[i].origin[1];
+		max[1] = (max[1] > segs[i].origin[1]) ? max[1] : segs[i].origin[1];
 		min[0] = (min[0] < segs[i].origin[0]) ? min[0] : segs[i].origin[0];
-		min[1] = (min[1] < segs[i].origin[0]) ? min[1] : segs[i].origin[1];
+		min[1] = (min[1] < segs[i].origin[1]) ? min[1] : segs[i].origin[1];
 	}
 	if ((max[0] < 点[0]) || (max[1] < 点[1]) || (min[0] > 点[0]) || (min[1] > 点[1]))
 	{
@@ -313,10 +313,10 @@ __host__ __device__ bool poly::full_overlap(const poly other) const
 				return false;
 			}
 		}
-	}
-	if (!point_in(other[0].origin))
-	{
-		return false;
+		if (!point_in(other[i].origin))
+		{
+			return false;
+		}
 	}
 	return true;
 }

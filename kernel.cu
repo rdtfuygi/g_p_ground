@@ -210,6 +210,7 @@ int main()
 
 	vector 初始解[8] = { vector(0.0,0.0),vector(0.0,-1.0),vector(0.0,-2.0),vector(1.0,-2.0),vector(1.0,-1.0),vector(-1.0,1.0),vector(-1.0,-1.0),vector(-1.0,0.0) };
 
+	int loops = 0;
 	while(true)
 	{
 		ground a;
@@ -224,13 +225,13 @@ int main()
 
 			cv::imshow("123", p);
 			cv::waitKey(1000);
-			if (cv::waitKey(3000) != 'r')
+			if (cv::waitKey(3000) != 'n')
 			{
 				break;
 			}
 		}
 
-		double s = a.area();
+		double a_s = a.area();
 
 		std::vector<building> b(8);
 
@@ -247,51 +248,8 @@ int main()
 
 			b[i].site.reset_seg();
 
-			b[i].target_area = double(rand()) / RAND_MAX * s * 0.125;
+			b[i].target_area = double(rand()) / RAND_MAX * a_s * 0.125;
 		}
-
-		//double 温度 = 10000;
-		//double 冷却_率 = 0.999;
-		//double g = -DBL_MAX;
-		//while (温度 > 1)
-		//{
-		//	std::vector<building> b_t = b;
-		//	for (int i = 0; i < b_t.size(); i++)
-		//	{
-		//		for (int j = 0; j < 20; j++)
-		//		{
-		//			b_t[i].site[j].origin = point(vector(b_t[i].site[j].origin) + vector((double(rand()) / RAND_MAX - 0.5) * 2, (double(rand()) / RAND_MAX - 0.5) * 2));
-		//		}
-		//
-		//		b_t[i].site.reset_seg();
-		//		//b_t[0] = 停车场设置(b_t[1]);
-		//		double g_t = 奖励函数(a, b_t);
-		//		printf("%3f\n", g_t);
-		//		if (g < g_t)
-		//		{
-		//			b = b_t;
-		//			g = g_t;
-		//		}
-		//		else
-		//		{
-		//			double d = g_t - g;
-		//			if (exp(-d / 温度) > (double(rand()) / RAND_MAX))
-		//			{
-		//				b = b_t;
-		//				g = g_t;
-		//			}
-		//		}
-		//		cv::Mat p = cv::Mat::zeros(h, w, CV_8UC3);
-		//		a.print(p, 比例, cv::Scalar(255, 255, 255));
-		//		for (int i = 0; i < b.size(); i++)
-		//		{
-		//			b[i].print(p, 比例, cv::Scalar(255, 255 / b.size() * i, 0));
-		//		}
-		//		cv::imshow("123", p);
-		//		cv::waitKey(1);
-		//	}
-		//	温度 *= 冷却_率;
-		//}
 
 		for (int i = 0; i < b.size(); i++)
 		{
@@ -301,10 +259,12 @@ int main()
 		cv::imshow("123", p);
 		cv::waitKey(1);
 
+		int r = 0;
+
 		while(true)
 		{
 			std::vector<double> output;
-			output.reserve(926);
+			output.reserve(936);
 			std::vector<double> a_data;
 			a.data(a_data);
 			output.insert(output.end(), a_data.begin(), a_data.end());
@@ -335,39 +295,72 @@ int main()
 				b[i].door[1] = int(input[i * 42 + 41]);
 				b[i].site.reset_seg();
 			}
-			std::vector<double> callback(1);
-			callback[0] = 奖励函数(a, b);
+			std::vector<double> callback;
+			bool reset = false;
+			callback.reserve(2);
+			callback.push_back(奖励函数(a, b, reset));
 			callback_pip.send(callback);
 
-			p = cv::Mat::zeros(h, w, CV_8UC3);
-			a.print(p, 比例, cv::Scalar(255, 255, 255));
-			for (int i = 0; i < b.size(); i++)
+			if (reset)
 			{
-				b[i].print(p, 比例, cv::Scalar(255, 255 / b.size() * i, 0));
-			}
+				r += 10;
+				if (r > 100)
+				{
+					r = 0;
+					double 缩放 = (double(rand()) / RAND_MAX + 0.5);
+					vector 平移(double(rand()) / RAND_MAX, double(rand()) / RAND_MAX);
+					b = std::vector<building>(8);
+					for (int i = 0; i < b.size(); i++)
+					{
+						b[i].fun = i;
+						for (int j = 0; j < 20; j++)
+						{
+							b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun] + 平移) * 50) * 缩放 + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 10));
+						}
 
 
-			cv::imshow("123", p);
-			int key = cv::waitKey(1);
-			if (key == 'n')
-			{
-				break;
+						b[i].site.reset_seg();
+
+						b[i].target_area = double(rand()) / RAND_MAX * a_s * 0.125;
+					}
+				}
 			}
-			else if (key == 'r')
+			r = (r > 0) ? r - 5 : 0;
+
+			if ((loops % 1) == 0)
 			{
-				b = std::vector<building>(8);
+				p = cv::Mat::zeros(h, w, CV_8UC3);
+				a.print(p, 比例, cv::Scalar(255, 255, 255));
 				for (int i = 0; i < b.size(); i++)
 				{
-					b[i].fun = i;
-					for (int j = 0; j < 20; j++)
+					b[i].print(p, 比例, cv::Scalar(255, 255 / b.size() * i, 0));
+				}
+
+
+				cv::imshow("123", p);
+				int key = cv::waitKey(1);
+				if (key == 'n')
+				{
+					break;
+				}
+				else if (key == 'r')
+				{
+					double 缩放 = (double(rand()) / RAND_MAX + 0.5);
+					vector 平移(double(rand()) / RAND_MAX, double(rand()) / RAND_MAX);
+					b = std::vector<building>(8);
+					for (int i = 0; i < b.size(); i++)
 					{
-						b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun]) * 50) + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 10));
+						b[i].fun = i;
+						for (int j = 0; j < 20; j++)
+						{
+							b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun] + 平移) * 50) * 缩放 + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 10));
+						}
+
+
+						b[i].site.reset_seg();
+
+						b[i].target_area = double(rand()) / RAND_MAX * a_s * 0.125;
 					}
-
-
-					b[i].site.reset_seg();
-
-					b[i].target_area = double(rand()) / RAND_MAX * s * 0.125;
 				}
 			}
 
@@ -376,25 +369,37 @@ int main()
 			{
 				s += b[i].area();
 			}
-			if (s > a.area())
+			if (s > a_s)
 			{
+				double 缩放 = (double(rand()) / RAND_MAX + 0.5);
+				vector 平移(double(rand()) / RAND_MAX, double(rand()) / RAND_MAX);
 				b = std::vector<building>(8);
 				for (int i = 0; i < b.size(); i++)
 				{
 					b[i].fun = i;
 					for (int j = 0; j < 20; j++)
 					{
-						b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun]) * 50) + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 10));
+						b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun] + 平移) * 50) * 缩放 + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 10));
 					}
 
 
 					b[i].site.reset_seg();
 
-					b[i].target_area = double(rand()) / RAND_MAX * s * 0.125;
+					b[i].target_area = double(rand()) / RAND_MAX * a_s * 0.125;
 				}
+			}
+
+			loops++;
+			if (loops >= 10000)
+			{
+				loops = 0;
+				break;
 			}
 		}
 	}
+
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
 
 	return 0;
 }

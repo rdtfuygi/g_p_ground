@@ -59,15 +59,15 @@ __host__ __device__ void cross(const ray l_1, const line l_2, double& t_1, doubl
 
 __host__ __device__ void cross(const ray l_1, const ray l_2, double& t_1, double& t_2)
 {
-	if (((l_1.origin[0] < l_2.origin[0]) && (l_1.dir[0] < 0) && (0 < l_2.dir[0])) ||
-		((l_1.origin[0] > l_2.origin[0]) && (l_1.dir[0] > 0) && (0 > l_2.dir[0])) ||
-		((l_1.origin[1] < l_2.origin[1]) && (l_1.dir[1] < 0) && (0 < l_2.dir[1])) ||
-		((l_1.origin[1] > l_2.origin[1]) && (l_1.dir[1] > 0) && (0 > l_2.dir[1])))
-	{
-		t_1 = DBL_MAX;
-		t_2 = DBL_MAX;
-		return;
-	}
+	//if (((l_1.origin[0] < l_2.origin[0]) && (l_1.dir[0] < 0) && (0 < l_2.dir[0])) ||
+	//	((l_1.origin[0] > l_2.origin[0]) && (l_1.dir[0] > 0) && (0 > l_2.dir[0])) ||
+	//	((l_1.origin[1] < l_2.origin[1]) && (l_1.dir[1] < 0) && (0 < l_2.dir[1])) ||
+	//	((l_1.origin[1] > l_2.origin[1]) && (l_1.dir[1] > 0) && (0 > l_2.dir[1])))
+	//{
+	//	t_1 = DBL_MAX;
+	//	t_2 = DBL_MAX;
+	//	return;
+	//}
 	cross(line(l_1), line(l_2), t_1, t_2);
 	if ((0 > t_1) || (0 > t_2))
 	{
@@ -78,16 +78,16 @@ __host__ __device__ void cross(const ray l_1, const ray l_2, double& t_1, double
 
 __host__ __device__ void cross(const ray l_1, const seg l_2, double& t_1, double& t_2)
 {
-	point end = l_2.end();
-	if ((fmin(l_2.origin[0], end[0]) > l_1.origin[0]) && (l_2.dir[0] < 0) ||
-		(fmin(l_2.origin[1], end[1]) > l_1.origin[1]) && (l_2.dir[1] < 0) ||
-		(fmax(l_2.origin[0], end[0]) < l_1.origin[0]) && (l_2.dir[0] > 0) ||
-		(fmax(l_2.origin[1], end[1]) < l_1.origin[1]) && (l_2.dir[1] > 0))
-	{
-		t_1 = DBL_MAX;
-		t_2 = DBL_MAX;
-		return;
-	}
+	//point end = l_2.end();
+	//if ((fmin(l_2.origin[0], end[0]) > l_1.origin[0]) && (l_2.dir[0] < 0) ||
+	//	(fmin(l_2.origin[1], end[1]) > l_1.origin[1]) && (l_2.dir[1] < 0) ||
+	//	(fmax(l_2.origin[0], end[0]) < l_1.origin[0]) && (l_2.dir[0] > 0) ||
+	//	(fmax(l_2.origin[1], end[1]) < l_1.origin[1]) && (l_2.dir[1] > 0))
+	//{
+	//	t_1 = DBL_MAX;
+	//	t_2 = DBL_MAX;
+	//	return;
+	//}
 	cross(line(l_1), line(l_2), t_1, t_2);
 	if ((0 > t_1) || (0 > t_2) || (t_2 > l_2.dist))
 	{
