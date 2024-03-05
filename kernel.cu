@@ -1,4 +1,4 @@
-﻿
+﻿#define _USE_MATH_DEFINES 
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
@@ -135,6 +135,36 @@
 //}
 
 
+void 建筑重置(std::vector<building>& b, double a_s)
+{
+	vector 初始解[8] = { vector(0.0,0.0),vector(0.0,-1.0),vector(0.0,-2.0),vector(1.0,-2.0),vector(1.0,-1.0),vector(-1.0,1.0),vector(-1.0,-1.0),vector(-1.0,0.0) };
+
+	double 缩放 = (double(rand()) / RAND_MAX + 0.5);
+	vector 平移(double(rand()) / RAND_MAX, double(rand()) / RAND_MAX);
+	b = std::vector<building>(8);
+
+	double s = 0;
+	while (s < a_s)
+	{
+		s = 0;
+		for (int i = 0; i < b.size(); i++)
+		{
+			b[i].target_area = double(rand()) / RAND_MAX * a_s * 0.5;
+			s += b[i].target_area;
+		}
+	}
+
+	for (int i = 0; i < b.size(); i++)
+	{
+		double 半径 = sqrt(b[i].target_area / M_PI) / 8;
+		b[i].fun = i;
+		for (int j = 0; j < 20; j++)
+		{
+			b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun]) * 50) + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 半径));
+		}
+		b[i].site.reset_seg();
+	}
+}
 
 
 
@@ -208,7 +238,7 @@ int main()
 		&pi
 	);
 
-	vector 初始解[8] = { vector(0.0,0.0),vector(0.0,-1.0),vector(0.0,-2.0),vector(1.0,-2.0),vector(1.0,-1.0),vector(-1.0,1.0),vector(-1.0,-1.0),vector(-1.0,0.0) };
+	//vector 初始解[8] = { vector(0.0,0.0),vector(0.0,-1.0),vector(0.0,-2.0),vector(1.0,-2.0),vector(1.0,-1.0),vector(-1.0,1.0),vector(-1.0,-1.0),vector(-1.0,0.0) };
 
 	int loops = 0;
 	while(true)
@@ -237,19 +267,7 @@ int main()
 
 
 
-		for (int i = 0; i < b.size(); i++)
-		{
-			b[i].fun = i;
-			for (int j = 0; j < 20; j++)
-			{
-				b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun]) * 50) + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 10));
-			}
-
-
-			b[i].site.reset_seg();
-
-			b[i].target_area = double(rand()) / RAND_MAX * a_s * 0.125;
-		}
+		建筑重置(b, a_s);
 
 		for (int i = 0; i < b.size(); i++)
 		{
@@ -294,6 +312,7 @@ int main()
 				b[i].door[0] = int(input[i * 42 + 40]);
 				b[i].door[1] = int(input[i * 42 + 41]);
 				b[i].site.reset_seg();
+				//b[i].site.simple(5);
 			}
 			std::vector<double> callback;
 			bool reset = false;
@@ -304,26 +323,11 @@ int main()
 			if (reset)
 			{
 				r += 10;
-				if (r > 100)
-				{
-					r = 0;
-					double 缩放 = (double(rand()) / RAND_MAX + 0.5);
-					vector 平移(double(rand()) / RAND_MAX, double(rand()) / RAND_MAX);
-					b = std::vector<building>(8);
-					for (int i = 0; i < b.size(); i++)
-					{
-						b[i].fun = i;
-						for (int j = 0; j < 20; j++)
-						{
-							b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun] + 平移) * 50) * 缩放 + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 10));
-						}
-
-
-						b[i].site.reset_seg();
-
-						b[i].target_area = double(rand()) / RAND_MAX * a_s * 0.125;
-					}
-				}
+			}
+			if (r > 1000)
+			{
+				r = 0;
+				建筑重置(b, a_s);
 			}
 			r = (r > 0) ? r - 5 : 0;
 
@@ -345,22 +349,7 @@ int main()
 				}
 				else if (key == 'r')
 				{
-					double 缩放 = (double(rand()) / RAND_MAX + 0.5);
-					vector 平移(double(rand()) / RAND_MAX, double(rand()) / RAND_MAX);
-					b = std::vector<building>(8);
-					for (int i = 0; i < b.size(); i++)
-					{
-						b[i].fun = i;
-						for (int j = 0; j < 20; j++)
-						{
-							b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun] + 平移) * 50) * 缩放 + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 10));
-						}
-
-
-						b[i].site.reset_seg();
-
-						b[i].target_area = double(rand()) / RAND_MAX * a_s * 0.125;
-					}
+					建筑重置(b, a_s);
 				}
 			}
 
@@ -371,22 +360,7 @@ int main()
 			}
 			if (s > a_s)
 			{
-				double 缩放 = (double(rand()) / RAND_MAX + 0.5);
-				vector 平移(double(rand()) / RAND_MAX, double(rand()) / RAND_MAX);
-				b = std::vector<building>(8);
-				for (int i = 0; i < b.size(); i++)
-				{
-					b[i].fun = i;
-					for (int j = 0; j < 20; j++)
-					{
-						b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun] + 平移) * 50) * 缩放 + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 10));
-					}
-
-
-					b[i].site.reset_seg();
-
-					b[i].target_area = double(rand()) / RAND_MAX * a_s * 0.125;
-				}
+				建筑重置(b, a_s);
 			}
 
 			loops++;

@@ -144,6 +144,8 @@ public:
 
 	__host__ __device__ bool legal();
 
+	__host__ __device__ double one_link_area();
+
 	__host__ __device__ void point_get(point*& µã) const;
 	void point_get(std::vector<point>& µã) const;
 	__host__ __device__ void seg_get(seg*& Ïß¶Î) const;
@@ -158,9 +160,13 @@ public:
 
 	__host__ __device__ bool full_overlap(const poly other) const;
 
+	__host__ __device__ double overlap_area(const poly other) const;
+
 	__host__ __device__ seg& operator[](int i);
 
 	__host__ __device__ seg operator[](int i) const;
+
+	__host__ __device__ double dir_area() const;
 
 	__host__ __device__ double area() const;
 
@@ -172,6 +178,8 @@ public:
 };
 
 __host__ __device__ bool is_overlap(const poly p_1, const poly p_2);
+
+__host__ __device__ double overlap_area(const poly p_1, const poly p_2);
 
 __host__ __device__ double dist(const poly p_1, const poly p_2);
 

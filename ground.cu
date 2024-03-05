@@ -19,7 +19,7 @@ ground::ground(std::vector<point>& 点, int 门_1, int 门_2) : site(点)
 
 __host__ __device__ double ground::area() const
 {
-	return abs(site.area());
+	return site.area();
 }
 
 void ground::print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细) const
@@ -167,7 +167,7 @@ building 停车场设置(building 分拣区)
 {
 	seg 平行[5];
 	double 旋转 = 90;
-	if (分拣区.site.area() > 0)
+	if (分拣区.site.dir_area() > 0)
 	{
 		旋转 = -90;
 	}
@@ -219,60 +219,74 @@ const char 关联表[8][8] =
 
 double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 {
-	double 分数 = 3e10;
+	double 分数 = 0;
 
 	const double
-		场地内_权重 = 1000000000,
-		面积_权重 = -1,
-		平直角_权重 = 10000,
-		距离_权重 = 10,
-		重叠_权重 = 1000000000,
-		合法_权重 = 1000000000,
+		场地内_权重 = 100000,
+		面积_权重 = -0.01,
+		平直角_权重 = 1000,
+		距离_权重 = -100,
+		重叠_权重 = 100000,
+		合法_权重 = 100000,
 		周长_权重 = -10;
 
 
 	for (int i = 0; i < 建筑.size(); i++)
 	{
-		if (场地.site.full_overlap(建筑[i].site))
-		{
-			分数 += 场地内_权重;
-		}
-		else
-		{
-			reset = true;
-		}
+		double 面积 = 建筑[i].area();
 
-		for (int j = 0; j < i; j++)
-		{
-			if (!建筑[i].site.is_overlap(建筑[j].site))
-			{
-				分数 += 重叠_权重;
-			}
-			else
-			{
-				reset = true;
-			}
-			分数 += -dist(建筑[i].site, 建筑[j].site) * 距离_权重 * 关联表[建筑[i].fun][建筑[j].fun];
-		}
+		//if (场地.site.full_overlap(建筑[i].site))
+		//{
+		//	分数 += 场地内_权重;
+		//}
+		//else
+		//{
+		//	double a = fmin(1, pow(overlap_area(场地.site, 建筑[i].site) / 面积, 2));
+		//	分数 += 场地内_权重 * a;
+		//	reset = true;
+		//}
 
-		分数 += pow((建筑[i].area() - 建筑[i].target_area), 2) * 面积_权重;
+		//for (int j = 0; j < i; j++)
+		//{
+		//	if (!建筑[i].site.is_overlap(建筑[j].site))
+		//	{
+		//		分数 += 重叠_权重;
+		//	}
+		//	else
+		//	{
+		//		double a = (1 - fmin(1, pow(overlap_area(建筑[j].site, 建筑[i].site) / 面积, 2)));
+		//		分数 += 重叠_权重 * a;
+		//		reset = true;
+		//	}
+		//	分数 += dist(建筑[i].site, 建筑[j].site) * 距离_权重 * 关联表[建筑[i].fun][建筑[j].fun];
+		//}
+
+		//分数 += pow((面积 - 建筑[i].target_area), 2) * 面积_权重;
 
 		for (int j = 0; j < 20; j++)
 		{
-			分数 += (fmax(fmax((建筑[i].site[j].dir * 建筑[i].site[(j + 1) % 20].dir), 0), abs(建筑[i].site[j].dir ^ 建筑[i].site[(j + 1) % 20].dir)) - M_SQRT1_2) * 平直角_权重;
+			double a = fmax(fmax((建筑[i].site[j].dir * 建筑[i].site[(j + 1) % 20].dir), 0), abs(建筑[i].site[j].dir ^ 建筑[i].site[(j + 1) % 20].dir));
+			分数 += (a + pow(a, 16)) * 平直角_权重;
+			//分数 += 建筑[i].site[j].dist * 周长_权重;
 
-			分数 += 建筑[i].site[j].dist * 周长_权重;
+			if (a < M_SQRT1_2)
+			{
+				reset = true;
+			}
 		}
 
-		if (建筑[i].site.legal())
-		{
-			分数 += 合法_权重;
-		}
-		else
-		{
-			reset = true;
-		}
+		//if (建筑[i].site.legal())
+		//{
+		//	分数 += 合法_权重;
+		//}
+		//else
+		//{
+		//	double a = fmin(1, pow(建筑[i].site.one_link_area() / 面积, 2));
+		//	分数 += 合法_权重 * a;
+		//	reset = true;
+		//}
 	}
+
 	return 分数;
 }
 

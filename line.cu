@@ -69,14 +69,12 @@ __host__ __device__ void cross(const line l_1, const line l_2, double& t_1, doub
 	};
 	if (¾ØÕó[0][0] != 0)
 	{
+		double a00 = ¾ØÕó[0][0];
+		double a10 = ¾ØÕó[1][0];
+		for (int i = 0; i < 3; i++)
 		{
-			double a00 = ¾ØÕó[0][0];
-			double a10 = ¾ØÕó[1][0];
-			for (int i = 0; i < 3; i++)
-			{
-				¾ØÕó[0][i] /= a00;
-				¾ØÕó[1][i] -= ¾ØÕó[0][i] * a10;
-			}
+			¾ØÕó[0][i] /= a00;
+			¾ØÕó[1][i] -= ¾ØÕó[0][i] * a10;
 		}
 
 		if (¾ØÕó[1][1] == 0)
@@ -86,14 +84,12 @@ __host__ __device__ void cross(const line l_1, const line l_2, double& t_1, doub
 			return;
 		}
 
+		double a01 = ¾ØÕó[0][1];
+		double a11 = ¾ØÕó[1][1];
+		for (int i = 0; i < 3; i++)
 		{
-			double a01 = ¾ØÕó[0][1];
-			double a11 = ¾ØÕó[1][1];
-			for (int i = 0; i < 3; i++)
-			{
-				¾ØÕó[1][i] /= a11;
-				¾ØÕó[0][i] -= ¾ØÕó[1][i] * a01;
-			}
+			¾ØÕó[1][i] /= a11;
+			¾ØÕó[0][i] -= ¾ØÕó[1][i] * a01;
 		}
 
 		t_1 = ¾ØÕó[0][2];
@@ -101,14 +97,12 @@ __host__ __device__ void cross(const line l_1, const line l_2, double& t_1, doub
 	}
 	else if (¾ØÕó[1][0] != 0)
 	{
+		double a10 = ¾ØÕó[1][0];
+		double a00 = ¾ØÕó[0][0];
+		for (int i = 0; i < 3; i++)
 		{
-			double a10 = ¾ØÕó[1][0];
-			double a00 = ¾ØÕó[0][0];
-			for (int i = 0; i < 3; i++)
-			{
-				¾ØÕó[1][i] /= a10;
-				¾ØÕó[0][i] -= ¾ØÕó[1][i] * a00;
-			}
+			¾ØÕó[1][i] /= a10;
+			¾ØÕó[0][i] -= ¾ØÕó[1][i] * a00;
 		}
 
 		if (¾ØÕó[0][1] == 0)
@@ -118,14 +112,12 @@ __host__ __device__ void cross(const line l_1, const line l_2, double& t_1, doub
 			return;
 		}
 
+		double a11 = ¾ØÕó[1][1];
+		double a01 = ¾ØÕó[0][1];
+		for (int i = 0; i < 3; i++)
 		{
-			double a11 = ¾ØÕó[1][1];
-			double a01 = ¾ØÕó[0][1];
-			for (int i = 0; i < 3; i++)
-			{
-				¾ØÕó[0][i] /= a01;
-				¾ØÕó[1][i] -= ¾ØÕó[0][i] * a11;
-			}
+			¾ØÕó[0][i] /= a01;
+			¾ØÕó[1][i] -= ¾ØÕó[0][i] * a11;
 		}
 
 
