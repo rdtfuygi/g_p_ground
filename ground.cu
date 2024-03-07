@@ -101,67 +101,67 @@ void building::data(std::vector<double>& 数据)
 
 
 
-__global__ void building_move(building* 建筑, vector* 移动, int 尺寸)
-{
-	int i = threadIdx.x + blockIdx.x * blockDim.x;
-	if (i >= 尺寸)
-	{
-		return;
-	}
-	建筑[i / 20].move(移动[i], i % 20);
-}
-
-__global__ void building_reset_seg(building* 建筑, int 尺寸)
-{
-	int i = threadIdx.x + blockIdx.x * blockDim.x;
-	if (i >= 尺寸)
-	{
-		return;
-	}
-	建筑[i / 20].site.reset_seg(i % 20);
-}
-
-void 建筑更改(std::vector<building>& 建筑, std::vector<vector>& 移动)
-{
-	int cuda设备数量;
-	cudaGetDeviceCount(&cuda设备数量);
-	if (cuda设备数量 == 0)
-	{
-		for (int i = 0; i < 建筑.size(); i++)
-		{
-			for (int j = 0; j < 移动.size(); j++)
-			{
-				建筑[i].move(移动[i * 20 + j], j);
-			}
-			建筑[i].site.reset_seg();
-		}
-	}
-	else
-	{
-		int 显卡id;
-		cudaGetDevice(&显卡id);
-		cudaDeviceProp 显卡属性;
-		cudaGetDeviceProperties(&显卡属性, 显卡id);
-		int 每块线程 = 显卡属性.maxThreadsPerBlock;
-		int 块数 = 移动.size() / 每块线程 + 1;
-
-		building* 建筑_dev = NULL;//
-		vector* 移动_dev = NULL;//
-		cudaMalloc((void**)建筑_dev, sizeof(building) * 建筑.size());
-		cudaMalloc((void**)移动_dev, sizeof(vector) * 移动.size());
-		cudaMemcpy(建筑_dev, 建筑.data(), sizeof(building) * 建筑.size(), cudaMemcpyHostToDevice);
-		cudaMemcpy(移动_dev, 建筑.data(), sizeof(vector) * 移动.size(), cudaMemcpyHostToDevice);
-
-		building_move << < 块数, 每块线程 >> > (建筑_dev, 移动_dev, 移动.size());
-
-		cudaFree(移动_dev);
-
-		building_reset_seg << < 块数, 每块线程 >> > (建筑_dev, 移动.size());
-
-		cudaMemcpy(建筑.data(), 建筑_dev, sizeof(building) * 建筑.size(), cudaMemcpyDeviceToHost);
-		cudaFree(建筑_dev);
-	}
-}
+//__global__ void building_move(building* 建筑, vector* 移动, int 尺寸)
+//{
+//	int i = threadIdx.x + blockIdx.x * blockDim.x;
+//	if (i >= 尺寸)
+//	{
+//		return;
+//	}
+//	建筑[i / 20].move(移动[i], i % 20);
+//}
+//
+//__global__ void building_reset_seg(building* 建筑, int 尺寸)
+//{
+//	int i = threadIdx.x + blockIdx.x * blockDim.x;
+//	if (i >= 尺寸)
+//	{
+//		return;
+//	}
+//	建筑[i / 20].site.reset_seg(i % 20);
+//}
+//
+//void 建筑更改(std::vector<building>& 建筑, std::vector<vector>& 移动)
+//{
+//	int cuda设备数量;
+//	cudaGetDeviceCount(&cuda设备数量);
+//	if (cuda设备数量 == 0)
+//	{
+//		for (int i = 0; i < 建筑.size(); i++)
+//		{
+//			for (int j = 0; j < 移动.size(); j++)
+//			{
+//				建筑[i].move(移动[i * 20 + j], j);
+//			}
+//			建筑[i].site.reset_seg();
+//		}
+//	}
+//	else
+//	{
+//		int 显卡id;
+//		cudaGetDevice(&显卡id);
+//		cudaDeviceProp 显卡属性;
+//		cudaGetDeviceProperties(&显卡属性, 显卡id);
+//		int 每块线程 = 显卡属性.maxThreadsPerBlock;
+//		int 块数 = 移动.size() / 每块线程 + 1;
+//
+//		building* 建筑_dev = NULL;//
+//		vector* 移动_dev = NULL;//
+//		cudaMalloc((void**)建筑_dev, sizeof(building) * 建筑.size());
+//		cudaMalloc((void**)移动_dev, sizeof(vector) * 移动.size());
+//		cudaMemcpy(建筑_dev, 建筑.data(), sizeof(building) * 建筑.size(), cudaMemcpyHostToDevice);
+//		cudaMemcpy(移动_dev, 建筑.data(), sizeof(vector) * 移动.size(), cudaMemcpyHostToDevice);
+//
+//		building_move << < 块数, 每块线程 >> > (建筑_dev, 移动_dev, 移动.size());
+//
+//		cudaFree(移动_dev);
+//
+//		building_reset_seg << < 块数, 每块线程 >> > (建筑_dev, 移动.size());
+//
+//		cudaMemcpy(建筑.data(), 建筑_dev, sizeof(building) * 建筑.size(), cudaMemcpyDeviceToHost);
+//		cudaFree(建筑_dev);
+//	}
+//}
 
 building 停车场设置(building 分拣区)
 {

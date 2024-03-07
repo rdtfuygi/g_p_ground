@@ -305,7 +305,7 @@ int main()
 				input_point.reserve(20);
 				for (int j = 0; j < 20; j++)
 				{				
-					vector temp = vector(point(input[i * 42 + j * 2], input[i * 42 + j * 2 + 1])) * 5;
+					vector temp = vector(point(input[i * 42 + j * 2], input[i * 42 + j * 2 + 1]));
 					input_point.push_back(temp);
 				}
 				b[i].move(input_point.data());
