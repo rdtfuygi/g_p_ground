@@ -287,7 +287,7 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 		//}
 	}
 
-	return 分数;
+	return 分数 / 320000;
 }
 
 void 仓库面积_计算(std::vector<double>& 仓库面积, std::vector<double>& 补货点_, std::vector<double>& 订货批量_, std::vector<char>& 库存类型, std::vector<double>& 仓库限高)
