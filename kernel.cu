@@ -12,7 +12,7 @@
 
 #include <random>
 
-
+#include <algorithm>
 #include <cmath>
 
 #include "other.cuh"
@@ -45,7 +45,7 @@ void 建筑重置(std::vector<building>& b, double a_s)
 		b[i].fun = i;
 		for (int j = 0; j < 20; j++)
 		{
-			b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun]) * 50) + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 半径));
+			b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun]) * 100) + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 半径));
 		}
 		b[i].site.reset_seg();
 	}
@@ -96,7 +96,7 @@ int main()
 	//面积设定(b, 总需求, 仓库面积);
 
 
-	int w = 900, h = 900;
+	int w = 800, h = 800;
 	double 比例 = 1;
 	point o(0, 0);
 
@@ -133,39 +133,49 @@ int main()
 	{
 		ground a;
 		cv::Mat p;
+
+		double a_s;
+
+		std::vector<building> b(8);
 		while (true)
 		{
-			a = 场地设定(double(rand()) / RAND_MAX * 200000 + 200000);
+			a = 场地设定(double(rand()) / RAND_MAX * 100000 + 300000);
 			a.site.move2center();
+
+			a_s = a.area();
+			建筑重置(b, a_s);
+
+			bool reset = false;
+			for (int i = 0; i < 8; i++)
+			{
+				if (!b[i].site.is_overlap(a.site))
+				{
+					reset = true;
+					break;
+				}
+			}
+			if (reset)
+			{
+				continue;
+			}
 
 			p = cv::Mat::zeros(h, w, CV_8UC3);
 			a.print(p, 比例, cv::Scalar(255, 255, 255));
 
+			for (int i = 0; i < b.size(); i++)
+			{
+				b[i].print(p, 比例, cv::Scalar(255, 255 / b.size() * i, 0));
+			}
+
 			cv::imshow("123", p);
-			cv::waitKey(1000);
 			if (cv::waitKey(3000) != 'n')
 			{
 				break;
 			}
 		}
 
-		double a_s = a.area();
 
-		std::vector<building> b(8);
-
-
-
-		建筑重置(b, a_s);
-
-		for (int i = 0; i < b.size(); i++)
-		{
-			b[i].print(p, 比例, cv::Scalar(255, 255 / b.size() * i, 0));
-		}
-
-		cv::imshow("123", p);
-		cv::waitKey(1);
-
-		int r = 0;
+		int r_times = 0;
 
 		double 分数;
 		{
@@ -202,9 +212,9 @@ int main()
 					vector temp = vector(point(input[i * 42 + j * 2], input[i * 42 + j * 2 + 1]));
 					input_point.push_back(temp);
 				}
-				b[i].move(input_point.data());
-				b[i].door[0] = int(input[i * 42 + 40]);
-				b[i].door[1] = int(input[i * 42 + 41]);
+				b[i].move(input_point.data(), b, a);
+				b[i].door[0] = fmin(fmax(std::round(input[i * 42 + 40]), 0.0), 19.0);
+				b[i].door[1] = fmin(fmax(std::round(input[i * 42 + 41]), 0.0), 19.0);
 				b[i].site.reset_seg();
 				//b[i].site.simple(5);
 			}
@@ -221,18 +231,18 @@ int main()
 
 			if (reset)
 			{
-				r += 10;
+				r_times += 10;
 			}
-			if (r > 1000)
+			if (r_times > 1000)
 			{
-				r = 0;
+				r_times = 0;
 				建筑重置(b, a_s);
 				{
 					bool temp;
 					分数 = 奖励函数(a, b, temp);
 				}
 			}
-			r = (r > 0) ? r - 5 : 0;
+			r_times = (r_times > 0) ? r_times - 5 : 0;
 
 			if ((loops % 1) == 0)
 			{

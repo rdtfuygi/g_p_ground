@@ -23,6 +23,8 @@ public:
 	__host__ __device__ ground(point 点[20], int 门_1, int 门_2);
 	ground(std::vector<point>& 点, int 门_1, int 门_2);
 
+	__host__ __device__ seg get_door(int i = 0) const;
+
 	__host__ __device__ double area() const;
 
 	void print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
@@ -51,6 +53,7 @@ public:
 	building(std::vector<point>& 点, int 门_1, int 门_2, int 类型, double 目标大小);
 	__host__ __device__ void move(vector 移动, int index);
 	__host__ __device__ void move(vector 移动[20]);
+	void move(vector 移动[20], std::vector<building>& b, ground a);
 	__host__ __device__ void change(point 点, int index);
 	__host__ __device__ void change(point 点[20]);
 
@@ -58,7 +61,7 @@ public:
 };
 
 
-void 建筑更改(std::vector<building>& 建筑, std::vector<vector>& 移动);
+//void 建筑更改(std::vector<building>& 建筑, std::vector<vector>& 移动);
 
 building 停车场设置(building 分拣区);
 

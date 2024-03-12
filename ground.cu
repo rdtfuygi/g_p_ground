@@ -17,6 +17,11 @@ ground::ground(std::vector<point>& 点, int 门_1, int 门_2) : site(点)
 	door[1] = 门_2;
 }
 
+__host__ __device__ seg ground::get_door(int i) const
+{
+	return site[door[i]];
+}
+
 __host__ __device__ double ground::area() const
 {
 	return site.area();
@@ -25,6 +30,9 @@ __host__ __device__ double ground::area() const
 void ground::print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细) const
 {
 	site.print(图像, 比例, 颜色, 粗细);
+	get_door(0).print(图像, 比例, 颜色, 粗细 * 2);
+	get_door(1).print(图像, 比例, 颜色, 粗细 * 2);
+	//site.center().print(图像, 比例, 颜色, 粗细);
 }
 
 void ground::data(std::vector<double>& 数据)
@@ -61,6 +69,112 @@ __host__ __device__ void building::move(vector 移动[20])
 {
 	for (int i = 0; i < 20; i++)
 	{
+		move(移动[i], i);
+	}
+	site.reset_seg();
+}
+
+void building::move(vector 移动[20], std::vector<building>& b, ground a)
+{
+	for (int i = 0; i < 20; i++)
+	{
+		seg t[3] =
+		{
+			seg(point(vector(site[i].origin) + 移动[i]),site[(i + 1) % 20].origin),
+			seg(point(vector(site[i].origin) + 移动[i]),site[(i + 19) % 20].origin),
+			seg(point(vector(site[i].origin) + 移动[i]),site[i].origin)
+		};
+		
+		bool m = true;
+		for (int j = 0; j < 8; j++)
+		{
+			for (int k = 0; k < 20; k++)
+			{
+				if ((fun == j) && ((k == i) || (k == ((i + 19) % 20))))
+				{
+					if (((t[0].dir * t[1].dir) > 0.99) || ((t[0].dir * b[j].site[(i + 1) % 20].dir) < -0.99) || ((b[j].site[(i + 18) % 20].dir * t[1].dir) > 0.99))
+					{
+						m = false;
+						break;
+					}
+					else
+					{
+						continue;
+					}
+				}
+
+				double t11, t12, t21, t22;
+				//cross(site[i], b[j].site[k], t11, t12);
+				//cross(site[(i - 1) % 20], b[j].site[k], t21, t22);
+
+				//if ((t11 != DBL_MAX) || (t21 != DBL_MAX))
+				//{
+				//	//if ((fun == j) &&  (k == ((i - 2) % 20)))
+				//	//{
+				//	//	if (!(((t11 > (site[i].dist - 0.001)) && (k == ((i + 1) % 20))) || ((t21 < 0.01) && (k == ((i - 2) % 20)))))
+				//	//	{
+				//	//		continue;
+				//	//	}
+				//	//}
+				//	//else
+				//	//{
+				//	//	continue;
+				//	//}
+				//	continue;
+				//}
+
+				cross(t[0], b[j].site[k], t11, t12);
+				cross(t[1], b[j].site[k], t21, t22);
+				cross(t[2], b[j].site[k], t12, t22);
+				if ((t11 != DBL_MAX) || (t21 != DBL_MAX) || (t12 != DBL_MAX))
+				{
+					if (fun == j)
+					{
+						if (((t11 > (t[0].dist - 0.001)) && (k == ((i + 1) % 20))) || ((t21 > (t[1].dist - 0.001)) && (k == ((i + 18) % 20))))
+						{
+							continue;
+						}
+					}
+
+
+					m = false;
+					break;
+				}
+			}
+			if (!m)
+			{
+				break;
+			}
+		}
+
+		for (int k = 0; k < 20; k++)
+		{
+			double t11, t12, t21, t22;
+			//cross(site[i], a.site[k], t11, t12);
+			//cross(site[(i - 1) % 20], a.site[k], t21, t22);
+
+			//if ((t11 != DBL_MAX) || (t21 != DBL_MAX))
+			//{
+			//	continue;
+			//}
+
+			cross(t[0], a.site[k], t11, t12);
+			cross(t[1], a.site[k], t21, t22);
+			cross(t[2], a.site[k], t12, t22);
+			if ((t11 < DBL_MAX) || (t21 != DBL_MAX) || (t12 != DBL_MAX))
+			{
+				m = false;
+				break;
+			}
+		}
+
+
+
+		if (!m)
+		{
+			continue;
+		}
+
 		move(移动[i], i);
 	}
 	site.reset_seg();
@@ -222,52 +336,67 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 	double 分数 = 0;
 
 	const double
-		场地内_权重 = 100000,
-		面积_权重 = -0.01,
-		平直角_权重 = 1000,
-		距离_权重 = -100,
-		重叠_权重 = 100000,
-		合法_权重 = 100000,
-		周长_权重 = -10;
+		场地内_权重 = 0.34,
+		面积_权重 = 0.25,
+		平直角_权重 = 0.15,
+		距离_权重 = 0.2,
+		门_权重 = 0.2,
+		重叠_权重 = 0.33,
+		合法_权重 = 0.33,
+		周长_权重 = 0.1;
 
 
 	for (int i = 0; i < 建筑.size(); i++)
 	{
 		double 面积 = 建筑[i].area();
 
-		//if (场地.site.full_overlap(建筑[i].site))
-		//{
-		//	分数 += 场地内_权重;
-		//}
-		//else
-		//{
-		//	double a = fmin(1, pow(overlap_area(场地.site, 建筑[i].site) / 面积, 2));
-		//	分数 += 场地内_权重 * a;
-		//	reset = true;
-		//}
+		if (场地.site.full_overlap(建筑[i].site))
+		{
+			分数 += 场地内_权重;
+		}
+		else
+		{
+			double a = fmin(1, pow(overlap_area(场地.site, 建筑[i].site) / 面积, 2));
+			分数 += 场地内_权重 * a / 2;
+			reset = true;
+		}
 
-		//for (int j = 0; j < i; j++)
-		//{
-		//	if (!建筑[i].site.is_overlap(建筑[j].site))
-		//	{
-		//		分数 += 重叠_权重;
-		//	}
-		//	else
-		//	{
-		//		double a = (1 - fmin(1, pow(overlap_area(建筑[j].site, 建筑[i].site) / 面积, 2)));
-		//		分数 += 重叠_权重 * a;
-		//		reset = true;
-		//	}
-		//	分数 += dist(建筑[i].site, 建筑[j].site) * 距离_权重 * 关联表[建筑[i].fun][建筑[j].fun];
-		//}
+		for (int j = 0; j < i; j++)
+		{
+			if (!建筑[i].site.is_overlap(建筑[j].site))
+			{
+				分数 += 重叠_权重 / 28 * 8;
+			}
+			else
+			{
+				double a = (1 - fmin(1, pow(overlap_area(建筑[j].site, 建筑[i].site) / 面积, 2)));
+				分数 += 重叠_权重 * a / 2 / 28 * 8;
+				reset = true;
+			}
 
-		//分数 += pow((面积 - 建筑[i].target_area), 2) * 面积_权重;
+			if (关联表[建筑[i].fun][建筑[j].fun] >= 0)
+			{
+				分数 += exp(-dist(建筑[i].site, 建筑[j].site) * 关联表[建筑[i].fun][建筑[j].fun] / 100) * 距离_权重 / 28 * 8;
 
+				分数 += exp(-fmin(dist(建筑[j].site, 建筑[i].get_door(0)), dist(建筑[j].site, 建筑[i].get_door(1))) * 关联表[建筑[i].fun][建筑[j].fun] / 100) * 门_权重 / 28 * 8;
+			}
+			else
+			{
+				分数 += (1 - exp(-dist(建筑[i].site, 建筑[j].site)) / 100) * 距离_权重 / 28 * 8;
+
+				分数 += (1 - exp(-fmin(dist(建筑[j].site, 建筑[i].get_door(0)), dist(建筑[j].site, 建筑[i].get_door(1))) / 100)) * 门_权重 / 28 * 8;
+			}
+		}
+
+		分数 += exp(-pow((面积 - 建筑[i].target_area) / 10000, 2)) * 面积_权重;
+
+		double 周长 = 0;
 		for (int j = 0; j < 20; j++)
 		{
 			double a = fmax(fmax((建筑[i].site[j].dir * 建筑[i].site[(j + 1) % 20].dir), 0), abs(建筑[i].site[j].dir ^ 建筑[i].site[(j + 1) % 20].dir));
-			分数 += (a + pow(a, 16)) * 平直角_权重;
-			//分数 += 建筑[i].site[j].dist * 周长_权重;
+			分数 += (a + pow(a, 16)) / 2 * 平直角_权重 / 20;
+
+			周长 += 建筑[i].site[j].dist;
 
 			if (a < M_SQRT1_2)
 			{
@@ -275,19 +404,21 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 			}
 		}
 
-		//if (建筑[i].site.legal())
-		//{
-		//	分数 += 合法_权重;
-		//}
-		//else
-		//{
-		//	double a = fmin(1, pow(建筑[i].site.one_link_area() / 面积, 2));
-		//	分数 += 合法_权重 * a;
-		//	reset = true;
-		//}
+		分数 += fmin(1, exp(sqrt(建筑[i].target_area) - 周长)) * 周长_权重;
+
+		if (建筑[i].site.legal())
+		{
+			分数 += 合法_权重;
+		}
+		else
+		{
+			double a = fmin(1, pow(建筑[i].site.dir_area() / 面积, 2));
+			分数 += 合法_权重 * a / 2;
+			reset = true;
+		}
 	}
 
-	return 分数 / 320000;
+	return 分数 / 8;
 }
 
 void 仓库面积_计算(std::vector<double>& 仓库面积, std::vector<double>& 补货点_, std::vector<double>& 订货批量_, std::vector<char>& 库存类型, std::vector<double>& 仓库限高)
