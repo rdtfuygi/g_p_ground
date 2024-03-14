@@ -1,5 +1,8 @@
 #pragma once
+#ifndef ground_
+#define ground_
 #include "ground.cuh"
+#endif
 
 #include <cmath>
 

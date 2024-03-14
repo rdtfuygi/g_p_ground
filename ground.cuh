@@ -53,7 +53,7 @@ public:
 	building(std::vector<point>& 点, int 门_1, int 门_2, int 类型, double 目标大小);
 	__host__ __device__ void move(vector 移动, int index);
 	__host__ __device__ void move(vector 移动[20]);
-	void move(vector 移动[20], std::vector<building>& b, ground a);
+	void move(std::vector<vector>& 移动, std::vector<building>& b, ground a,int& n);
 	__host__ __device__ void change(point 点, int index);
 	__host__ __device__ void change(point 点[20]);
 
@@ -64,6 +64,16 @@ public:
 //void 建筑更改(std::vector<building>& 建筑, std::vector<vector>& 移动);
 
 building 停车场设置(building 分拣区);
+
+extern double
+场地内_权重,
+重叠_权重,
+合法_权重,
+面积_权重,
+平直角_权重,
+距离_权重,
+门_权重,
+周长_权重;
 
 double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset);
 

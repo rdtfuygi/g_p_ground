@@ -74,97 +74,41 @@ __host__ __device__ void building::move(vector 移动[20])
 	site.reset_seg();
 }
 
-void building::move(vector 移动[20], std::vector<building>& b, ground a)
+void building::move(std::vector<vector>& 移动, std::vector<building>& b, ground a, int& n)
 {
 	for (int i = 0; i < 20; i++)
 	{
-		seg t[3] =
-		{
-			seg(point(vector(site[i].origin) + 移动[i]),site[(i + 1) % 20].origin),
-			seg(point(vector(site[i].origin) + 移动[i]),site[(i + 19) % 20].origin),
-			seg(point(vector(site[i].origin) + 移动[i]),site[i].origin)
-		};
-		
+		poly temp = site;
+		move(移动[i], i);
+
+		site.reset_seg();
+
 		bool m = true;
-		for (int j = 0; j < 8; j++)
+
+		if (((site[(i + 1) % 20].dir * site[i % 20].dir) < -M_SQRT1_2) || ((site[i].dir * site[(i + 19) % 20].dir) < -M_SQRT1_2) || ((site[(i + 19) % 20].dir * site[(i + 18) % 20].dir) < -M_SQRT1_2))
 		{
-			for (int k = 0; k < 20; k++)
+			m = false;
+		}
+		else if (!site.legal())
+		{
+			m = false;
+		}
+		else if (!a.site.full_overlap(site))
+		{
+			m = false;
+		}
+		else
+		{
+			for (int j = 0; j < 8; j++)
 			{
-				if ((fun == j) && ((k == i) || (k == ((i + 19) % 20))))
+				if(j!=fun)
 				{
-					if (((t[0].dir * t[1].dir) > 0.99) || ((t[0].dir * b[j].site[(i + 1) % 20].dir) < -0.99) || ((b[j].site[(i + 18) % 20].dir * t[1].dir) > 0.99))
+					if (site.is_overlap(b[j].site))
 					{
 						m = false;
 						break;
 					}
-					else
-					{
-						continue;
-					}
 				}
-
-				double t11, t12, t21, t22;
-				//cross(site[i], b[j].site[k], t11, t12);
-				//cross(site[(i - 1) % 20], b[j].site[k], t21, t22);
-
-				//if ((t11 != DBL_MAX) || (t21 != DBL_MAX))
-				//{
-				//	//if ((fun == j) &&  (k == ((i - 2) % 20)))
-				//	//{
-				//	//	if (!(((t11 > (site[i].dist - 0.001)) && (k == ((i + 1) % 20))) || ((t21 < 0.01) && (k == ((i - 2) % 20)))))
-				//	//	{
-				//	//		continue;
-				//	//	}
-				//	//}
-				//	//else
-				//	//{
-				//	//	continue;
-				//	//}
-				//	continue;
-				//}
-
-				cross(t[0], b[j].site[k], t11, t12);
-				cross(t[1], b[j].site[k], t21, t22);
-				cross(t[2], b[j].site[k], t12, t22);
-				if ((t11 != DBL_MAX) || (t21 != DBL_MAX) || (t12 != DBL_MAX))
-				{
-					if (fun == j)
-					{
-						if (((t11 > (t[0].dist - 0.001)) && (k == ((i + 1) % 20))) || ((t21 > (t[1].dist - 0.001)) && (k == ((i + 18) % 20))))
-						{
-							continue;
-						}
-					}
-
-
-					m = false;
-					break;
-				}
-			}
-			if (!m)
-			{
-				break;
-			}
-		}
-
-		for (int k = 0; k < 20; k++)
-		{
-			double t11, t12, t21, t22;
-			//cross(site[i], a.site[k], t11, t12);
-			//cross(site[(i - 1) % 20], a.site[k], t21, t22);
-
-			//if ((t11 != DBL_MAX) || (t21 != DBL_MAX))
-			//{
-			//	continue;
-			//}
-
-			cross(t[0], a.site[k], t11, t12);
-			cross(t[1], a.site[k], t21, t22);
-			cross(t[2], a.site[k], t12, t22);
-			if ((t11 < DBL_MAX) || (t21 != DBL_MAX) || (t12 != DBL_MAX))
-			{
-				m = false;
-				break;
 			}
 		}
 
@@ -172,12 +116,10 @@ void building::move(vector 移动[20], std::vector<building>& b, ground a)
 
 		if (!m)
 		{
-			continue;
+			n++;
+			site = temp;
 		}
-
-		move(移动[i], i);
 	}
-	site.reset_seg();
 }
 
 __host__ __device__ void building::change(point 点, int index)
@@ -330,20 +272,21 @@ const char 关联表[8][8] =
 	{0, 0, 0, 0, 0, 1, 4, 0}
 };
 
+double
+场地内_权重 = 0,
+重叠_权重 = 0,
+合法_权重 = 0,
+面积_权重 = 0.25,
+平直角_权重 = 0.2,
+距离_权重 = 0.15,
+门_权重 = 0.1,
+周长_权重 = 0.5;
 
 double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 {
 	double 分数 = 0;
 
-	const double
-		场地内_权重 = 0.34,
-		面积_权重 = 0.25,
-		平直角_权重 = 0.15,
-		距离_权重 = 0.2,
-		门_权重 = 0.2,
-		重叠_权重 = 0.33,
-		合法_权重 = 0.33,
-		周长_权重 = 0.1;
+
 
 
 	for (int i = 0; i < 建筑.size(); i++)
@@ -388,13 +331,13 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 			}
 		}
 
-		分数 += exp(-pow((面积 - 建筑[i].target_area) / 10000, 2)) * 面积_权重;
+		分数 += pow(1 - 面积 / 建筑[i].target_area, 2) * 面积_权重;
 
 		double 周长 = 0;
 		for (int j = 0; j < 20; j++)
 		{
 			double a = fmax(fmax((建筑[i].site[j].dir * 建筑[i].site[(j + 1) % 20].dir), 0), abs(建筑[i].site[j].dir ^ 建筑[i].site[(j + 1) % 20].dir));
-			分数 += (a + pow(a, 16)) / 2 * 平直角_权重 / 20;
+			分数 += (a + pow(a, 16)) / 2 * 平直角_权重;
 
 			周长 += 建筑[i].site[j].dist;
 
@@ -404,7 +347,7 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 			}
 		}
 
-		分数 += fmin(1, exp(sqrt(建筑[i].target_area) - 周长)) * 周长_权重;
+		分数 += (1 - fmax(周长 / 4 / sqrt(面积), 1)) * 周长_权重;
 
 		if (建筑[i].site.legal())
 		{
@@ -417,7 +360,6 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 			reset = true;
 		}
 	}
-
 	return 分数 / 8;
 }
 
