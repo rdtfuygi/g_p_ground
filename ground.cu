@@ -47,10 +47,9 @@ void ground::data(std::vector<double>& 数据)
 		数据.push_back(site[i].dir[1]);
 		数据.push_back(site[i].dist);
 	}
-	数据.push_back(area());
 	数据.push_back(double(door[0]));
 	数据.push_back(double(door[1]));
-
+	数据.push_back(area());
 }
 
 
@@ -139,7 +138,10 @@ __host__ __device__ void building::change(point 点[20])
 void building::data(std::vector<double>& 数据)
 {
 	数据 = std::vector<double>();
-	数据.reserve(104);
+	数据.reserve(106);
+	point 重心 = site.center();
+	数据.push_back(重心[0] / 1024);
+	数据.push_back(重心[1] / 1024);
 	for (int i = 0; i < 20; i++)
 	{
 		数据.push_back(site[i].origin[0]);
@@ -148,10 +150,10 @@ void building::data(std::vector<double>& 数据)
 		数据.push_back(site[i].dir[1]);
 		数据.push_back(site[i].dist);
 	}
-	数据.push_back(area());
 	数据.push_back(double(door[0]));
 	数据.push_back(double(door[1]));
-	数据.push_back(double(target_area));
+	数据.push_back(area());
+	数据.push_back(target_area);
 }
 
 
@@ -273,14 +275,11 @@ const char 关联表[8][8] =
 };
 
 double
-场地内_权重 = 0,
-重叠_权重 = 0,
-合法_权重 = 0,
-面积_权重 = 0.25,
-平直角_权重 = 0.2,
-距离_权重 = 0.15,
-门_权重 = 0.1,
-周长_权重 = 0.5;
+面积_权重 = 0,
+平直角_权重 = 0,
+距离_权重 = 0,
+门_权重 = 0,
+周长_权重 = 0;
 
 double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 {
@@ -293,29 +292,29 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 	{
 		double 面积 = 建筑[i].area();
 
-		if (场地.site.full_overlap(建筑[i].site))
-		{
-			分数 += 场地内_权重;
-		}
-		else
-		{
-			double a = fmin(1, pow(overlap_area(场地.site, 建筑[i].site) / 面积, 2));
-			分数 += 场地内_权重 * a / 2;
-			reset = true;
-		}
+		//if (场地.site.full_overlap(建筑[i].site))
+		//{
+		//	分数 += 场地内_权重;
+		//}
+		//else
+		//{
+		//	double a = fmin(1, pow(overlap_area(场地.site, 建筑[i].site) / 面积, 2));
+		//	分数 += 场地内_权重 * a / 2;
+		//	reset = true;
+		//}
 
 		for (int j = 0; j < i; j++)
 		{
-			if (!建筑[i].site.is_overlap(建筑[j].site))
-			{
-				分数 += 重叠_权重 / 28 * 8;
-			}
-			else
-			{
-				double a = (1 - fmin(1, pow(overlap_area(建筑[j].site, 建筑[i].site) / 面积, 2)));
-				分数 += 重叠_权重 * a / 2 / 28 * 8;
-				reset = true;
-			}
+			//if (!建筑[i].site.is_overlap(建筑[j].site))
+			//{
+			//	分数 += 重叠_权重 / 28 * 8;
+			//}
+			//else
+			//{
+			//	double a = (1 - fmin(1, pow(overlap_area(建筑[j].site, 建筑[i].site) / 面积, 2)));
+			//	分数 += 重叠_权重 * a / 2 / 28 * 8;
+			//	reset = true;
+			//}
 
 			if (关联表[建筑[i].fun][建筑[j].fun] >= 0)
 			{
@@ -331,13 +330,13 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 			}
 		}
 
-		分数 += pow(1 - 面积 / 建筑[i].target_area, 2) * 面积_权重;
+		分数 += -pow((建筑[i].target_area - 面积) / 1048576, 2) * 面积_权重;
 
 		double 周长 = 0;
 		for (int j = 0; j < 20; j++)
 		{
 			double a = fmax(fmax((建筑[i].site[j].dir * 建筑[i].site[(j + 1) % 20].dir), 0), abs(建筑[i].site[j].dir ^ 建筑[i].site[(j + 1) % 20].dir));
-			分数 += (a + pow(a, 16)) / 2 * 平直角_权重;
+			分数 += (a + pow(a, 16)) / 2 / 20 * 平直角_权重;
 
 			周长 += 建筑[i].site[j].dist;
 
@@ -347,18 +346,18 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 			}
 		}
 
-		分数 += (1 - fmax(周长 / 4 / sqrt(面积), 1)) * 周长_权重;
+		分数 += (4 * sqrt(面积) - fmax(周长, 4 * sqrt(面积))) / 1024 * 周长_权重;
 
-		if (建筑[i].site.legal())
-		{
-			分数 += 合法_权重;
-		}
-		else
-		{
-			double a = fmin(1, pow(建筑[i].site.dir_area() / 面积, 2));
-			分数 += 合法_权重 * a / 2;
-			reset = true;
-		}
+		//if (建筑[i].site.legal())
+		//{
+		//	分数 += 合法_权重;
+		//}
+		//else
+		//{
+		//	double a = fmin(1, pow(建筑[i].site.dir_area() / 面积, 2));
+		//	分数 += 合法_权重 * a / 2;
+		//	reset = true;
+		//}
 	}
 	return 分数 / 8;
 }

@@ -70,6 +70,9 @@ ground 场地设定(double 面积)
 			break;
 		}
 	}
+	输出.door[0] = rand() % 20;
+	输出.door[1] = rand() % 20;
+
 	return 输出;
 }
 

@@ -96,6 +96,10 @@
       <HostDebugInfo>false</HostDebugInfo>
       <DebugInformationFormat>None</DebugInformationFormat>
     </CudaCompile>
+    <CudaLink>
+      <Optimization>O2</Optimization>
+      <PerformDeviceLinkTimeOptimization>true</PerformDeviceLinkTimeOptimization>
+    </CudaLink>
   </ItemDefinitionGroup>
   <ItemGroup>
     <CudaCompile Include="ground.cu">

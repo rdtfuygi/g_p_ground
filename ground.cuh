@@ -32,15 +32,15 @@ public:
 	void data(std::vector<double>& 数据);
 };
 
-const int 
-	fun_port = 0,
-	fun_sort = 1,
-	fun_ware = 2,
-	fun_cold = 3,
-	fun_freezing = 4,
-	fun_adm = 5,
-	fun_live = 6,
-	fun_port_2 = 7;
+const int
+fun_port = 0,
+fun_sort = 1,
+fun_ware = 2,
+fun_cold = 3,
+fun_freezing = 4,
+fun_adm = 5,
+fun_live = 6,
+fun_port_2 = 7;
 
 
 class building :public ground
@@ -66,9 +66,6 @@ public:
 building 停车场设置(building 分拣区);
 
 extern double
-场地内_权重,
-重叠_权重,
-合法_权重,
 面积_权重,
 平直角_权重,
 距离_权重,
