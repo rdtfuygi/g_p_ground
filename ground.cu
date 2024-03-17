@@ -24,7 +24,7 @@ __host__ __device__ seg ground::get_door(int i) const
 
 __host__ __device__ double ground::area() const
 {
-	return site.area();
+	return site.dir_area();
 }
 
 void ground::print(cv::InputOutputArray Í¼Ïñ, double ±ÈÀı, const cv::Scalar& ÑÕÉ«, int ´ÖÏ¸) const
@@ -32,7 +32,9 @@ void ground::print(cv::InputOutputArray Í¼Ïñ, double ±ÈÀı, const cv::Scalar& ÑÕÉ
 	site.print(Í¼Ïñ, ±ÈÀı, ÑÕÉ«, ´ÖÏ¸);
 	get_door(0).print(Í¼Ïñ, ±ÈÀı, ÑÕÉ«, ´ÖÏ¸ * 2);
 	get_door(1).print(Í¼Ïñ, ±ÈÀı, ÑÕÉ«, ´ÖÏ¸ * 2);
-	//site.center().print(Í¼Ïñ, ±ÈÀı, ÑÕÉ«, ´ÖÏ¸);
+	//site.center().print(Í¼Ïñ, ±ÈÀı, ÑÕÉ«, ´ÖÏ¸ * 2);
+	//site.fast_center().print(Í¼Ïñ, ±ÈÀı, cv::Scalar(0, 0, 255), ´ÖÏ¸ * 2);
+
 }
 
 void ground::data(std::vector<double>& Êı¾İ)
@@ -139,7 +141,7 @@ void building::data(std::vector<double>& Êı¾İ)
 {
 	Êı¾İ = std::vector<double>();
 	Êı¾İ.reserve(106);
-	point ÖØĞÄ = site.center();
+	point ÖØĞÄ = site.fast_center();
 	Êı¾İ.push_back(ÖØĞÄ[0] / 1024);
 	Êı¾İ.push_back(ÖØĞÄ[1] / 1024);
 	for (int i = 0; i < 20; i++)
@@ -331,6 +333,7 @@ double ½±Àøº¯Êı(ground ³¡µØ, std::vector<building>& ½¨Öş, bool& reset)
 		}
 
 		·ÖÊı += -pow((½¨Öş[i].target_area - Ãæ»ı) / 1048576, 2) * Ãæ»ı_È¨ÖØ;
+		printf("%.3f,", Ãæ»ı / ½¨Öş[i].target_area);
 
 		double ÖÜ³¤ = 0;
 		for (int j = 0; j < 20; j++)
@@ -359,6 +362,7 @@ double ½±Àøº¯Êı(ground ³¡µØ, std::vector<building>& ½¨Öş, bool& reset)
 		//	reset = true;
 		//}
 	}
+	printf("\n");
 	return ·ÖÊı / 8;
 }
 

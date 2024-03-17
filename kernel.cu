@@ -37,13 +37,17 @@ void 建筑重置(std::vector<building>& b, double a_s)
 	b = std::vector<building>(8);
 
 	double s = 0;
-	while (s < a_s)
+	while (true)
 	{
 		s = 0;
 		for (int i = 0; i < b.size(); i++)
 		{
 			b[i].target_area = (double(rand()) / RAND_MAX + 0.01) * a_s * 0.5;
 			s += b[i].target_area;
+		}
+		if (((0.5 * a_s) < s) && (s < a_s))
+		{
+			break;
 		}
 	}
 
@@ -151,8 +155,6 @@ int main()
 		&pi
 	);
 
-	//vector 初始解[8] = { vector(0.0,0.0),vector(0.0,-1.0),vector(0.0,-2.0),vector(1.0,-2.0),vector(1.0,-1.0),vector(-1.0,1.0),vector(-1.0,-1.0),vector(-1.0,0.0) };
-
 	int loops = 0;
 
 	权重调整();
@@ -253,7 +255,6 @@ int main()
 					input[i * 42 + j * 2 + 1] = input_point[i][1];
 				}
 			}
-			//action_pip.send(input);
 
 
 			std::vector<double> callback;
@@ -286,7 +287,7 @@ int main()
 			}
 			r_times = (r_times > 0) ? r_times - 5 : 0;
 
-			if (((loops % 100) == 0) && (loops != 0))
+			if (((loops % 1000) == 0) && (loops != 0))
 			{
 				G_.push_back(分数);
 				r_times = 0;
