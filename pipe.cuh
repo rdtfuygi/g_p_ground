@@ -16,7 +16,7 @@ public:
 	~pipe();
 	bool connect();
 
-	bool send(std::vector<double>& 数据);
+	bool send(std::vector<float>& 数据);
 
-	bool receive(std::vector<double>& 数据);
+	bool receive(std::vector<float>& 数据);
 };

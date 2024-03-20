@@ -29,7 +29,7 @@ public:
 
 	void print(cv::InputOutputArray 图像, float 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
 
-	void data(std::vector<double>& 数据);
+	void data(std::vector<float>& 数据);
 };
 
 const int
@@ -57,7 +57,7 @@ public:
 	__host__ __device__ void change(point 点, int index);
 	__host__ __device__ void change(point 点[20]);
 
-	void data(std::vector<double>& 数据);
+	void data(std::vector<float>& 数据);
 };
 
 

@@ -218,15 +218,15 @@ int main()
 		while(true)
 		{
 			/////////////////////////////////////////////////////////////////////////
-			std::vector<double> output;
+			std::vector<float> output;
 			output.reserve(952);
 
-			std::vector<double> a_data;
+			std::vector<float> a_data;
 			a.data(a_data);
 			output.insert(output.end(), a_data.begin(), a_data.end());
 			for (int i = 0; i < b.size(); i++)
 			{
-				std::vector<double> b_data;
+				std::vector<float> b_data;
 				b[i].data(b_data);
 				output.insert(output.end(), b_data.begin(), b_data.end());
 			}
@@ -236,7 +236,7 @@ int main()
 
 			int 非法动作 = 0;
 			/////////////////////////////////////////////////////////////////////////
-			std::vector<double> input;
+			std::vector<float> input;
 			input_pip.receive(input);
 			for (int i = 0; i < b.size(); i++)
 			{
@@ -262,7 +262,7 @@ int main()
 
 			bool reset = false;
 			/////////////////////////////////////////////////////////////////////////
-			std::vector<double> callback;
+			std::vector<float> callback;
 			callback.reserve(2);
 			{
 				float temp = 奖励函数(a, b, reset);
@@ -274,7 +274,7 @@ int main()
 
 
 			/////////////////////////////////////////////////////////////////////////
-			std::vector<double> G_;	
+			std::vector<float> G_;	
 			/////////////////////////////////////////////////////////////////////////
 			if (reset)
 			{

@@ -37,9 +37,9 @@ void ground::print(cv::InputOutputArray Í¼Ïñ, float ±ÈÀı, const cv::Scalar& ÑÕÉ«
 
 }
 
-void ground::data(std::vector<double>& Êı¾İ)
+void ground::data(std::vector<float>& Êı¾İ)
 {
-	Êı¾İ = std::vector<double>();
+	Êı¾İ = std::vector<float>();
 	Êı¾İ.reserve(103);
 	for (int i = 0; i < 20; i++)
 	{
@@ -49,8 +49,8 @@ void ground::data(std::vector<double>& Êı¾İ)
 		Êı¾İ.push_back(site[i].dir[1]);
 		Êı¾İ.push_back(site[i].dist);
 	}
-	Êı¾İ.push_back(double(door[0]));
-	Êı¾İ.push_back(double(door[1]));
+	Êı¾İ.push_back(float(door[0]));
+	Êı¾İ.push_back(float(door[1]));
 	Êı¾İ.push_back(area());
 }
 
@@ -139,9 +139,9 @@ __host__ __device__ void building::change(point µã[20])
 	site.reset_seg();
 }
 
-void building::data(std::vector<double>& Êı¾İ)
+void building::data(std::vector<float>& Êı¾İ)
 {
-	Êı¾İ = std::vector<double>();
+	Êı¾İ = std::vector<float>();
 	Êı¾İ.reserve(106);
 	point ÖØĞÄ = site.fast_center();
 	Êı¾İ.push_back(ÖØĞÄ[0] / 1024);
@@ -156,8 +156,8 @@ void building::data(std::vector<double>& Êı¾İ)
 		Êı¾İ.push_back(site[i].dist);
 		ÖÜ³¤ += site[i].dist;
 	}
-	Êı¾İ.push_back(double(door[0]));
-	Êı¾İ.push_back(double(door[1]));
+	Êı¾İ.push_back(float(door[0]));
+	Êı¾İ.push_back(float(door[1]));
 	Êı¾İ.push_back(area() / target_area);
 	Êı¾İ.push_back(fmax(ÖÜ³¤ / 4 / sqrt(area()), 1));
 }
@@ -327,19 +327,19 @@ float ½±Àøº¯Êı(ground ³¡µØ, std::vector<building>& ½¨Öş, bool& reset)
 			·ÖÊı += -fmin(dist(½¨Öş[j].site, ½¨Öş[i].get_door(0)), dist(½¨Öş[j].site, ½¨Öş[i].get_door(1))) * ¹ØÁª±í[½¨Öş[i].fun][½¨Öş[j].fun] * ÃÅ_È¨ÖØ;
 		}
 
-		·ÖÊı += 1 - pow(1 - Ãæ»ı / ½¨Öş[i].target_area, 2) * Ãæ»ı_È¨ÖØ;
+		·ÖÊı += 1 - float(pow(1 - Ãæ»ı / ½¨Öş[i].target_area, 2)) * Ãæ»ı_È¨ÖØ;
 		printf("%.3f,", Ãæ»ı / ½¨Öş[i].target_area);
 
 		float ÖÜ³¤ = 0;
 		for (int j = 0; j < 20; j++)
 		{
-			float a = fmax(fmax((½¨Öş[i].site[j].dir * ½¨Öş[i].site[(j + 1) % 20].dir), 0), abs(½¨Öş[i].site[j].dir ^ ½¨Öş[i].site[(j + 1) % 20].dir));
-			·ÖÊı += (a + pow(a, 16)) / 2 / 20 * Æ½Ö±½Ç_È¨ÖØ;
+			float a = fmaxf(fmaxf((½¨Öş[i].site[j].dir * ½¨Öş[i].site[(j + 1) % 20].dir), 0), abs(½¨Öş[i].site[j].dir ^ ½¨Öş[i].site[(j + 1) % 20].dir));
+			·ÖÊı += (a + float(pow(a, 16))) / 2 / 20 * Æ½Ö±½Ç_È¨ÖØ;
 
 			ÖÜ³¤ += ½¨Öş[i].site[j].dist;
 		}
 
-		·ÖÊı += (1 - fmax(ÖÜ³¤ / 4 / sqrt(Ãæ»ı), 1)) * ÖÜ³¤_È¨ÖØ;
+		·ÖÊı += (1 - fmaxf(ÖÜ³¤ / 4 / sqrt(Ãæ»ı), 1)) * ÖÜ³¤_È¨ÖØ;
 
 		//if (½¨Öş[i].site.legal())
 		//{
@@ -371,12 +371,12 @@ void Ãæ»ıÉè¶¨(std::vector<building>& ½¨Öş, float ×ÜĞèÇó, std::vector<float>& ²Ö¿
 
 	½¨Öş[0].target_area = ×ÜĞèÇó / 30 / 365 / 24 * 3 * 35;
 	½¨Öş[1].target_area = ×ÜĞèÇó / 30 / 365 / 24 * 3 * 20;
-	½¨Öş[2].target_area = ²Ö¿âÃæ»ı[0] * 1.7;
-	½¨Öş[3].target_area = ²Ö¿âÃæ»ı[1] * 1.7;
-	½¨Öş[4].target_area = ²Ö¿âÃæ»ı[2] * 1.7;
+	½¨Öş[2].target_area = ²Ö¿âÃæ»ı[0] * 1.7f;
+	½¨Öş[3].target_area = ²Ö¿âÃæ»ı[1] * 1.7f;
+	½¨Öş[4].target_area = ²Ö¿âÃæ»ı[2] * 1.7f;
 	½¨Öş[5].target_area = 5000;
 	½¨Öş[6].target_area = ×ÜĞèÇó / 30 / 365 / 24 * (3 + 2) * 10;
-	½¨Öş[7].target_area = (500 * 0.7 + ×ÜĞèÇó / 30 / 365 / 24 * 3 * 0.3) * 40;
+	½¨Öş[7].target_area = (500 * 0.7f + ×ÜĞèÇó / 30 / 365 / 24 * 3 * 0.3f) * 40;
 
 	for (int i = 0; i < ½¨Öş.size(); i++)
 	{

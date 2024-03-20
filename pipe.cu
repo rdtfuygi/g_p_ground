@@ -46,7 +46,7 @@ bool pipe::connect()
 }
 
 
-bool pipe::send(std::vector<double>& 数据)
+bool pipe::send(std::vector<float>& 数据)
 {
 	DWORD 数据量 = 1;
 	while (数据量 != 0)
@@ -55,8 +55,8 @@ bool pipe::send(std::vector<double>& 数据)
 		//Sleep(1000);
 	}
 	数据.push_back(数据.size());
-	bool 结果 = WriteFile(pip, 数据.data(), sizeof(double) * 数据.size(), &数据量, NULL);
-	if (结果 && (数据量 == sizeof(double) * 数据.size()))
+	bool 结果 = WriteFile(pip, 数据.data(), sizeof(float) * 数据.size(), &数据量, NULL);
+	if (结果 && (数据量 == sizeof(float) * 数据.size()))
 	{
 		return true;
 	}
@@ -64,16 +64,16 @@ bool pipe::send(std::vector<double>& 数据)
 }
 
 
-bool pipe::receive(std::vector<double>& 数据)
+bool pipe::receive(std::vector<float>& 数据)
 {
 	DWORD 数据量 = 0;
 	while (数据量 == 0)
 	{
 		PeekNamedPipe(pip, NULL, NULL, NULL, &数据量, NULL);
 	}
-	数据 = std::vector<double>(数据量 / sizeof(double));
-	bool 结果 = ReadFile(pip, 数据.data(), sizeof(double) * 数据.size(), &数据量, NULL);
-	double 尺寸 = 数据[数据.size() - 1];
+	数据 = std::vector<float>(数据量 / sizeof(float));
+	bool 结果 = ReadFile(pip, 数据.data(), sizeof(float) * 数据.size(), &数据量, NULL);
+	float 尺寸 = 数据[数据.size() - 1];
 	数据.erase(数据.end() - 1);
 	if (结果 && (数据.size() == 尺寸))
 	{
