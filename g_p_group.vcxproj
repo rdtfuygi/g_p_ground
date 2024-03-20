@@ -91,10 +91,10 @@
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <FastMath>true</FastMath>
-      <Optimization>O2</Optimization>
+      <Optimization>Od</Optimization>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <HostDebugInfo>false</HostDebugInfo>
-      <DebugInformationFormat>None</DebugInformationFormat>
+      <HostDebugInfo>true</HostDebugInfo>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </CudaCompile>
     <CudaLink>
       <Optimization>O2</Optimization>

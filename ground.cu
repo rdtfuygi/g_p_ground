@@ -24,7 +24,7 @@ __host__ __device__ seg ground::get_door(int i) const
 
 __host__ __device__ double ground::area() const
 {
-	return site.dir_area();
+	return abs(site.dir_area());
 }
 
 void ground::print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细) const
@@ -82,7 +82,8 @@ void building::move(std::vector<vector>& 移动, std::vector<building>& b, ground 
 		poly temp = site;
 		move(移动[i], i);
 
-		site.reset_seg();
+		site.reset_seg(i);
+		site.reset_seg((i + 19) % 20);
 
 		bool m = true;
 
@@ -121,6 +122,7 @@ void building::move(std::vector<vector>& 移动, std::vector<building>& b, ground 
 			site = temp;
 		}
 	}
+
 }
 
 __host__ __device__ void building::change(point 点, int index)
@@ -144,6 +146,7 @@ void building::data(std::vector<double>& 数据)
 	point 重心 = site.fast_center();
 	数据.push_back(重心[0] / 1024);
 	数据.push_back(重心[1] / 1024);
+	double 周长 = 0;
 	for (int i = 0; i < 20; i++)
 	{
 		数据.push_back(site[i].origin[0]);
@@ -151,11 +154,12 @@ void building::data(std::vector<double>& 数据)
 		数据.push_back(site[i].dir[0]);
 		数据.push_back(site[i].dir[1]);
 		数据.push_back(site[i].dist);
+		周长 += site[i].dist;
 	}
 	数据.push_back(double(door[0]));
 	数据.push_back(double(door[1]));
-	数据.push_back(area());
-	数据.push_back(target_area);
+	数据.push_back(area() / target_area);
+	数据.push_back(fmax(周长 / 4 / sqrt(area()), 1));
 }
 
 
@@ -318,21 +322,12 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 			//	reset = true;
 			//}
 
-			if (关联表[建筑[i].fun][建筑[j].fun] >= 0)
-			{
-				分数 += exp(-dist(建筑[i].site, 建筑[j].site) * 关联表[建筑[i].fun][建筑[j].fun] / 100) * 距离_权重 / 28 * 8;
+			分数 += -dist(建筑[i].site, 建筑[j].site) * 关联表[建筑[i].fun][建筑[j].fun] * 距离_权重;
 
-				分数 += exp(-fmin(dist(建筑[j].site, 建筑[i].get_door(0)), dist(建筑[j].site, 建筑[i].get_door(1))) * 关联表[建筑[i].fun][建筑[j].fun] / 100) * 门_权重 / 28 * 8;
-			}
-			else
-			{
-				分数 += (1 - exp(-dist(建筑[i].site, 建筑[j].site)) / 100) * 距离_权重 / 28 * 8;
-
-				分数 += (1 - exp(-fmin(dist(建筑[j].site, 建筑[i].get_door(0)), dist(建筑[j].site, 建筑[i].get_door(1))) / 100)) * 门_权重 / 28 * 8;
-			}
+			分数 += -fmin(dist(建筑[j].site, 建筑[i].get_door(0)), dist(建筑[j].site, 建筑[i].get_door(1))) * 关联表[建筑[i].fun][建筑[j].fun] * 门_权重;
 		}
 
-		分数 += -pow((建筑[i].target_area - 面积) / 1048576, 2) * 面积_权重;
+		分数 += 1 - pow(1 - 面积 / 建筑[i].target_area, 2) * 面积_权重;
 		printf("%.3f,", 面积 / 建筑[i].target_area);
 
 		double 周长 = 0;
@@ -342,14 +337,9 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 			分数 += (a + pow(a, 16)) / 2 / 20 * 平直角_权重;
 
 			周长 += 建筑[i].site[j].dist;
-
-			if (a < M_SQRT1_2)
-			{
-				reset = true;
-			}
 		}
 
-		分数 += (4 * sqrt(面积) - fmax(周长, 4 * sqrt(面积))) / 1024 * 周长_权重;
+		分数 += (1 - fmax(周长 / 4 / sqrt(面积), 1)) * 周长_权重;
 
 		//if (建筑[i].site.legal())
 		//{

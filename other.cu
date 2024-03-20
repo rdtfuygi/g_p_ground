@@ -44,6 +44,9 @@ ground 场地设定(double 面积)
 			while (true)
 			{
 				输出.site[i].origin = point((double(rand()) / RAND_MAX - 0.5) * sqrt(面积) * 1.4, (double(rand()) / RAND_MAX - 0.5) * sqrt(面积) * 1.4);
+				输出.site.reset_seg(i);
+				输出.site.reset_seg((i + 19) % 20);
+
 				if (输出.site.legal())
 				{
 					break;

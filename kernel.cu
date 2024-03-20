@@ -300,7 +300,7 @@ int main()
 				}
 			}
 
-			if ((loops % 1) == 0)
+			if ((loops % 10) == 0)
 			{
 				p = cv::Mat::zeros(h, w, CV_8UC3);
 				a.print(p, 比例, cv::Scalar(255, 255, 255));
@@ -363,12 +363,7 @@ int main()
 				}
 			}
 
-			if (G_.size() == 0)
-			{
-				G_.push_back(0.0);
-			}
 
-			G_pipe.send(G_);
 
 			loops++;
 			if (loops >= 10000)
@@ -378,6 +373,13 @@ int main()
 				loops = 0;
 				break;
 			}
+
+			if (G_.size() == 0)
+			{
+				G_.push_back(0.0);
+			}
+
+			G_pipe.send(G_);
 		}
 	}
 
