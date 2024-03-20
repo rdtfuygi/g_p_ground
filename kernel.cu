@@ -28,21 +28,21 @@
 
 
 
-void 建筑重置(std::vector<building>& b, double a_s)
+void 建筑重置(std::vector<building>& b, float a_s)
 {
-	vector 初始解[8] = { vector(0.0,0.0),vector(0.0,-1.0),vector(0.0,-2.0),vector(1.0,-2.0),vector(1.0,-1.0),vector(-1.0,1.0),vector(-1.0,-1.0),vector(-1.0,0.0) };
+	vector 初始解[8] = { vector(0.0f,0.0f),vector(0.0f,-1.0f),vector(0.0f,-2.0f),vector(1.0f,-2.0f),vector(1.0f,-1.0f),vector(-1.0f,1.0f),vector(-1.0f,-1.0f),vector(-1.0f,0.0f) };
 
-	double 缩放 = (double(rand()) / RAND_MAX + 0.5);
-	vector 平移(double(rand()) / RAND_MAX, double(rand()) / RAND_MAX);
+	float 缩放 = (float(rand()) / RAND_MAX + 0.5f);
+	vector 平移(float(rand()) / RAND_MAX, float(rand()) / RAND_MAX);
 	b = std::vector<building>(8);
 
-	double s = 0;
+	float s = 0;
 	while (true)
 	{
 		s = 0;
 		for (int i = 0; i < b.size(); i++)
 		{
-			b[i].target_area = (double(rand()) / RAND_MAX + 0.01) * a_s * 0.5;
+			b[i].target_area = (float(rand()) / RAND_MAX + 0.01f) * a_s * 0.5f;
 			s += b[i].target_area;
 		}
 		if (((0.5 * a_s) < s) && (s < a_s))
@@ -53,21 +53,21 @@ void 建筑重置(std::vector<building>& b, double a_s)
 
 	for (int i = 0; i < b.size(); i++)
 	{
-		double 半径 = sqrt(b[i].target_area / M_PI) / 8;
+		float 半径 = sqrt(b[i].target_area / float(M_PI)) / 8;
 		b[i].fun = i;
 		for (int j = 0; j < 20; j++)
 		{
-			b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun]) * 100) + ((vector(1.0, 0.0).rotate(18 * j + 45)) * 半径));
+			b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun]) * 100) + ((vector(1.0f, 0.0f).rotate(18 * j + 45)) * 半径));
 		}
 		b[i].site.reset_seg();
 	}
 }
 
-double 非法_权重 = 10;
+float 非法_权重 = 10;
 void 权重调整()
 {
 	std::string temp[] = { "面积_权重 = ","平直角_权重 = ","距离_权重 = ","门_权重 = ","周长_权重 = ","非法_权重 = "};
-	double* t_d[] = { &面积_权重,&平直角_权重,&距离_权重,&门_权重,&周长_权重,&非法_权重 };
+	float* t_d[] = { &面积_权重,&平直角_权重,&距离_权重,&门_权重,&周长_权重,&非法_权重 };
 	for (int i = 0; i < 6; i++)
 	{
 		std::string t = temp[i] + "%.3f\n" + temp[i];
@@ -78,7 +78,7 @@ void 权重调整()
 		t_i = scanf("%f", &t_t);
 		if (t_i == 1)
 		{
-			*t_d[i] = double(t_t);
+			*t_d[i] = float(t_t);
 		}
 		printf("%.3f\n", *t_d[i]);
 	}
@@ -92,23 +92,23 @@ int main()
 
 
 	////m^3
-	//std::vector<double>年需求量 = { 13950000,13950000 * 0.3,13950000 * 0.2 };
+	//std::vector<float>年需求量 = { 13950000,13950000 * 0.3,13950000 * 0.2 };
 	//
-	//std::vector<double>订货成本 = { 10000,10000,10000 };
-	//std::vector<double>持有成本 = { 10,20,30 };
+	//std::vector<float>订货成本 = { 10000,10000,10000 };
+	//std::vector<float>持有成本 = { 10,20,30 };
 	//
-	//std::vector<double>需求方差 = { 400,100,100 };
-	//std::vector<double>提前期 = { 0.0004,0.0003,0.0003 };
-	//std::vector<double>提前期方差 = { 0.003,0.003,0.003 };
-	//std::vector<double>服务水平 = { 0.95,0.95,0.95 };
+	//std::vector<float>需求方差 = { 400,100,100 };
+	//std::vector<float>提前期 = { 0.0004,0.0003,0.0003 };
+	//std::vector<float>提前期方差 = { 0.003,0.003,0.003 };
+	//std::vector<float>服务水平 = { 0.95,0.95,0.95 };
 	//
 	//std::vector<char>库存类型 = { 0,1,2 };
 	//
-	//std::vector<double>补货点_(年需求量.size());
-	//std::vector<double>订货批量_(年需求量.size());
+	//std::vector<float>补货点_(年需求量.size());
+	//std::vector<float>订货批量_(年需求量.size());
 	//
 	//
-	//double 总需求 = 0;
+	//float 总需求 = 0;
 	//for (int i = 0; i < 年需求量.size(); i++)
 	//{
 	//	补货点_[i] = 补货点(年需求量[i], 需求方差[i], 提前期[i], 提前期方差[i], 服务水平[i]);
@@ -118,8 +118,8 @@ int main()
 	//	总需求 += 年需求量[i];
 	//}
 	//
-	//std::vector<double>仓库面积;
-	//std::vector<double>仓库限高 = { 30,10,10 };
+	//std::vector<float>仓库面积;
+	//std::vector<float>仓库限高 = { 30,10,10 };
 	//仓库面积_计算(仓库面积, 补货点_, 订货批量_, 库存类型, 仓库限高);
 	//
 	//std::vector<building> b;
@@ -128,7 +128,7 @@ int main()
 
 
 	int w = 800, h = 800;
-	double 比例 = 1;
+	float 比例 = 1;
 	point o(0, 0);
 
 
@@ -164,12 +164,12 @@ int main()
 		ground a;
 		cv::Mat p;
 
-		double a_s;
+		float a_s;
 
 		std::vector<building> b(8);
 		while (true)
 		{
-			a = 场地设定(double(rand()) / RAND_MAX * 100000 + 300000);
+			a = 场地设定(float(rand()) / RAND_MAX * 100000 + 300000);
 			a.site.move2center();
 
 			a_s = a.area();
@@ -209,7 +209,7 @@ int main()
 
 		int r_times = 0;
 
-		double 分数;
+		float 分数;
 		{
 			bool temp;
 			分数 = 奖励函数(a, b, temp);
@@ -217,8 +217,10 @@ int main()
 
 		while(true)
 		{
+			/////////////////////////////////////////////////////////////////////////
 			std::vector<double> output;
 			output.reserve(952);
+
 			std::vector<double> a_data;
 			a.data(a_data);
 			output.insert(output.end(), a_data.begin(), a_data.end());
@@ -230,17 +232,18 @@ int main()
 			}
 
 			output_pip.send(output);
-
-			std::vector<double> input;
-			input_pip.receive(input);
+			/////////////////////////////////////////////////////////////////////////
 
 			int 非法动作 = 0;
+			/////////////////////////////////////////////////////////////////////////
+			std::vector<double> input;
+			input_pip.receive(input);
 			for (int i = 0; i < b.size(); i++)
 			{
 				std::vector<vector> input_point;
 				input_point.reserve(20);
 				for (int j = 0; j < 20; j++)
-				{				
+				{
 					vector temp = vector(point(input[i * 42 + j * 2], input[i * 42 + j * 2 + 1]));
 					input_point.push_back(temp);
 				}
@@ -255,20 +258,24 @@ int main()
 					input[i * 42 + j * 2 + 1] = input_point[i][1];
 				}
 			}
+			/////////////////////////////////////////////////////////////////////////
 
-
-			std::vector<double> callback;
 			bool reset = false;
+			/////////////////////////////////////////////////////////////////////////
+			std::vector<double> callback;
 			callback.reserve(2);
-
 			{
-				double temp = 奖励函数(a, b, reset);
+				float temp = 奖励函数(a, b, reset);
 				callback.push_back(temp - 分数 - 非法动作 * 非法_权重 / 20 / 8);
 				分数 = temp;
 			}
 			callback_pip.send(callback);
+			/////////////////////////////////////////////////////////////////////////
 
-			std::vector<double> G_;			
+
+			/////////////////////////////////////////////////////////////////////////
+			std::vector<double> G_;	
+			/////////////////////////////////////////////////////////////////////////
 			if (reset)
 			{
 				r_times += 10;
@@ -346,20 +353,22 @@ int main()
 				}
 			}
 
-			double s = 0;
-			for (int i = 0; i < b.size(); i++)
 			{
-				s += b[i].area();
-			}
-			if (s > a_s)
-			{
-				G_.push_back(分数);
-				a.door[0] = rand() % 20;
-				a.door[1] = rand() % 20;
-				建筑重置(b, a_s);
+				float s = 0;
+				for (int i = 0; i < b.size(); i++)
 				{
-					bool temp;
-					分数 = 奖励函数(a, b, temp);
+					s += b[i].area();
+				}
+				if (s > a_s)
+				{
+					G_.push_back(分数);
+					a.door[0] = rand() % 20;
+					a.door[1] = rand() % 20;
+					建筑重置(b, a_s);
+					{
+						bool temp;
+						分数 = 奖励函数(a, b, temp);
+					}
 				}
 			}
 

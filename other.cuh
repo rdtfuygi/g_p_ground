@@ -6,11 +6,11 @@
 
 #include <cmath>
 
-double norm_quantile(double a);
+float norm_quantile(float a);
 
-double 订货批量(double 年需求量, double 订货成本, double 持有成本);
+float 订货批量(float 年需求量, float 订货成本, float 持有成本);
 
-double 补货点(double 年需求量, double 需求方差, double 提前期, double 提前期方差, double 服务水平);
+float 补货点(float 年需求量, float 需求方差, float 提前期, float 提前期方差, float 服务水平);
 
-ground 场地设定(double 面积);
+ground 场地设定(float 面积);
 

@@ -25,9 +25,9 @@ public:
 
 	__host__ __device__ seg get_door(int i = 0) const;
 
-	__host__ __device__ double area() const;
+	__host__ __device__ float area() const;
 
-	void print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
+	void print(cv::InputOutputArray 图像, float 比例, const cv::Scalar& 颜色, int 粗细 = 1) const;
 
 	void data(std::vector<double>& 数据);
 };
@@ -47,10 +47,10 @@ class building :public ground
 {
 public:
 	int fun;
-	double target_area;
+	float target_area;
 	__host__ __device__ building();
-	__host__ __device__ building(point 点[20], int 门_1, int 门_2, int 类型, double 目标大小);
-	building(std::vector<point>& 点, int 门_1, int 门_2, int 类型, double 目标大小);
+	__host__ __device__ building(point 点[20], int 门_1, int 门_2, int 类型, float 目标大小);
+	building(std::vector<point>& 点, int 门_1, int 门_2, int 类型, float 目标大小);
 	__host__ __device__ void move(vector 移动, int index);
 	__host__ __device__ void move(vector 移动[20]);
 	void move(std::vector<vector>& 移动, std::vector<building>& b, ground a,int& n);
@@ -65,15 +65,15 @@ public:
 
 building 停车场设置(building 分拣区);
 
-extern double
+extern float
 面积_权重,
 平直角_权重,
 距离_权重,
 门_权重,
 周长_权重;
 
-double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset);
+float 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset);
 
-void 仓库面积_计算(std::vector<double>& 仓库面积, std::vector<double>& 补货点_, std::vector<double>& 订货批量_, std::vector<char>& 库存类型, std::vector<double>& 仓库限高);
+void 仓库面积_计算(std::vector<float>& 仓库面积, std::vector<float>& 补货点_, std::vector<float>& 订货批量_, std::vector<char>& 库存类型, std::vector<float>& 仓库限高);
 
-void 面积设定(std::vector<building>& 建筑, double 总需求, std::vector<double>& 仓库面积);
+void 面积设定(std::vector<building>& 建筑, float 总需求, std::vector<float>& 仓库面积);

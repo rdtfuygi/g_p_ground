@@ -22,12 +22,12 @@ __host__ __device__ seg ground::get_door(int i) const
 	return site[door[i]];
 }
 
-__host__ __device__ double ground::area() const
+__host__ __device__ float ground::area() const
 {
 	return abs(site.dir_area());
 }
 
-void ground::print(cv::InputOutputArray 图像, double 比例, const cv::Scalar& 颜色, int 粗细) const
+void ground::print(cv::InputOutputArray 图像, float 比例, const cv::Scalar& 颜色, int 粗细) const
 {
 	site.print(图像, 比例, 颜色, 粗细);
 	get_door(0).print(图像, 比例, 颜色, 粗细 * 2);
@@ -57,9 +57,9 @@ void ground::data(std::vector<double>& 数据)
 
 building::building() :ground(), fun(0), target_area(0) {}
 
-building::building(point 点[20], int 门_1, int 门_2, int 类型, double 目标大小) :ground(点, 门_1, 门_2), fun(类型), target_area(目标大小) {}
+building::building(point 点[20], int 门_1, int 门_2, int 类型, float 目标大小) :ground(点, 门_1, 门_2), fun(类型), target_area(目标大小) {}
 
-building::building(std::vector<point>& 点, int 门_1, int 门_2, int 类型, double 目标大小) :ground(点, 门_1, 门_2), fun(类型), target_area(目标大小) {}
+building::building(std::vector<point>& 点, int 门_1, int 门_2, int 类型, float 目标大小) :ground(点, 门_1, 门_2), fun(类型), target_area(目标大小) {}
 
 __host__ __device__ void building::move(vector 移动, int index)
 {
@@ -146,7 +146,7 @@ void building::data(std::vector<double>& 数据)
 	point 重心 = site.fast_center();
 	数据.push_back(重心[0] / 1024);
 	数据.push_back(重心[1] / 1024);
-	double 周长 = 0;
+	float 周长 = 0;
 	for (int i = 0; i < 20; i++)
 	{
 		数据.push_back(site[i].origin[0]);
@@ -230,7 +230,7 @@ void building::data(std::vector<double>& 数据)
 building 停车场设置(building 分拣区)
 {
 	seg 平行[5];
-	double 旋转 = 90;
+	float 旋转 = 90;
 	if (分拣区.site.dir_area() > 0)
 	{
 		旋转 = -90;
@@ -280,23 +280,23 @@ const char 关联表[8][8] =
 	{0, 0, 0, 0, 0, 1, 4, 0}
 };
 
-double
+float
 面积_权重 = 0,
 平直角_权重 = 0,
 距离_权重 = 0,
 门_权重 = 0,
 周长_权重 = 0;
 
-double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
+float 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 {
-	double 分数 = 0;
+	float 分数 = 0;
 
 
 
 
 	for (int i = 0; i < 建筑.size(); i++)
 	{
-		double 面积 = 建筑[i].area();
+		float 面积 = 建筑[i].area();
 
 		//if (场地.site.full_overlap(建筑[i].site))
 		//{
@@ -304,7 +304,7 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 		//}
 		//else
 		//{
-		//	double a = fmin(1, pow(overlap_area(场地.site, 建筑[i].site) / 面积, 2));
+		//	float a = fmin(1, pow(overlap_area(场地.site, 建筑[i].site) / 面积, 2));
 		//	分数 += 场地内_权重 * a / 2;
 		//	reset = true;
 		//}
@@ -317,7 +317,7 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 			//}
 			//else
 			//{
-			//	double a = (1 - fmin(1, pow(overlap_area(建筑[j].site, 建筑[i].site) / 面积, 2)));
+			//	float a = (1 - fmin(1, pow(overlap_area(建筑[j].site, 建筑[i].site) / 面积, 2)));
 			//	分数 += 重叠_权重 * a / 2 / 28 * 8;
 			//	reset = true;
 			//}
@@ -330,10 +330,10 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 		分数 += 1 - pow(1 - 面积 / 建筑[i].target_area, 2) * 面积_权重;
 		printf("%.3f,", 面积 / 建筑[i].target_area);
 
-		double 周长 = 0;
+		float 周长 = 0;
 		for (int j = 0; j < 20; j++)
 		{
-			double a = fmax(fmax((建筑[i].site[j].dir * 建筑[i].site[(j + 1) % 20].dir), 0), abs(建筑[i].site[j].dir ^ 建筑[i].site[(j + 1) % 20].dir));
+			float a = fmax(fmax((建筑[i].site[j].dir * 建筑[i].site[(j + 1) % 20].dir), 0), abs(建筑[i].site[j].dir ^ 建筑[i].site[(j + 1) % 20].dir));
 			分数 += (a + pow(a, 16)) / 2 / 20 * 平直角_权重;
 
 			周长 += 建筑[i].site[j].dist;
@@ -347,7 +347,7 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 		//}
 		//else
 		//{
-		//	double a = fmin(1, pow(建筑[i].site.dir_area() / 面积, 2));
+		//	float a = fmin(1, pow(建筑[i].site.dir_area() / 面积, 2));
 		//	分数 += 合法_权重 * a / 2;
 		//	reset = true;
 		//}
@@ -356,7 +356,7 @@ double 奖励函数(ground 场地, std::vector<building>& 建筑, bool& reset)
 	return 分数 / 8;
 }
 
-void 仓库面积_计算(std::vector<double>& 仓库面积, std::vector<double>& 补货点_, std::vector<double>& 订货批量_, std::vector<char>& 库存类型, std::vector<double>& 仓库限高)
+void 仓库面积_计算(std::vector<float>& 仓库面积, std::vector<float>& 补货点_, std::vector<float>& 订货批量_, std::vector<char>& 库存类型, std::vector<float>& 仓库限高)
 {
 	仓库面积 = { 0,0,0 };
 	for (int i = 0; i < 补货点_.size(); i++)
@@ -365,7 +365,7 @@ void 仓库面积_计算(std::vector<double>& 仓库面积, std::vector<double>& 补货点_, 
 	}
 }
 
-void 面积设定(std::vector<building>& 建筑, double 总需求, std::vector<double>& 仓库面积)
+void 面积设定(std::vector<building>& 建筑, float 总需求, std::vector<float>& 仓库面积)
 {
 	建筑 = std::vector<building>(8);
 
