@@ -11,7 +11,7 @@
 
 #ifndef ground_
 #define ground_
-#include "ground.cuh"
+#include "ground.h"
 #endif
 
 
@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include "other.cuh"
+
 #include "pipe.h"
 
 
