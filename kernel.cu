@@ -24,7 +24,7 @@
 #include <cmath>
 
 #include "other.cuh"
-#include "pipe.cuh"
+#include "pipe.h"
 
 
 

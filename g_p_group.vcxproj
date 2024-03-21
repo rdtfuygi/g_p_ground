@@ -110,7 +110,6 @@
       <FileType>Document</FileType>
     </CudaCompile>
     <CudaCompile Include="other.cu" />
-    <CudaCompile Include="pipe.cu" />
     <CudaCompile Include="kernel.cu">
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateRelocatableDeviceCode>
       <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateRelocatableDeviceCode>
@@ -119,7 +118,6 @@
   <ItemGroup>
     <ClInclude Include="ground.cuh" />
     <ClInclude Include="other.cuh" />
-    <ClInclude Include="pipe.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
