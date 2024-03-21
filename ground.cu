@@ -87,7 +87,7 @@ void building::move(std::vector<vector>& ÒÆ¶¯, std::vector<building>& b, ground 
 
 		bool m = true;
 
-		if (((site[(i + 1) % 20].dir * site[i % 20].dir) < -M_SQRT1_2) || ((site[i].dir * site[(i + 19) % 20].dir) < -M_SQRT1_2) || ((site[(i + 19) % 20].dir * site[(i + 18) % 20].dir) < -M_SQRT1_2))
+		if (((site[(i + 1) % 20].dir * site[i % 20].dir) < -float(M_SQRT1_2)) || ((site[i].dir * site[(i + 19) % 20].dir) < -float(M_SQRT1_2)) || ((site[(i + 19) % 20].dir * site[(i + 18) % 20].dir) < -float(M_SQRT1_2)))
 		{
 			m = false;
 		}

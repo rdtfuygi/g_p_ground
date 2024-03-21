@@ -18,7 +18,7 @@ float norm_quantile(float a)
 
 	float x = ±í[int(a_t)] * (1 - a_t + int(a_t)) + ±í[int(a_t) + 1] * (a_t - int(a_t));
 
-	x = (a > 0.5) ? x : -x;
+	x = (a > 0.5f) ? x : -x;
 
 	return x;
 }

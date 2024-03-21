@@ -45,7 +45,7 @@ void 建筑重置(std::vector<building>& b, float a_s)
 			b[i].target_area = (float(rand()) / RAND_MAX + 0.01f) * a_s * 0.5f;
 			s += b[i].target_area;
 		}
-		if (((0.5 * a_s) < s) && (s < a_s))
+		if (((0.5f * a_s) < s) && (s < a_s))
 		{
 			break;
 		}
@@ -385,7 +385,7 @@ int main()
 
 			if (G_.size() == 0)
 			{
-				G_.push_back(0.0);
+				G_.push_back(0.0f);
 			}
 
 			G_pipe.send(G_);
