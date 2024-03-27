@@ -1,12 +1,10 @@
-﻿#define _USE_MATH_DEFINES 
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
+﻿#define _USE_MATH_DEFINES
 
 #include <stdio.h>
 
 #ifndef geometry
 #define geometry
-#include "geometry.cuh"
+#include "geometry.h"
 #endif
 
 #ifndef ground_
@@ -18,9 +16,9 @@
 
 #include <opencv2/core/utils/logger.hpp>
 
-#include <random>
+//#include <random>
 
-#include <algorithm>
+//#include <algorithm>
 #include <cmath>
 
 
@@ -28,60 +26,83 @@
 
 
 
-void 建筑重置(std::vector<building>& b, float a_s)
+void 建筑重置(std::vector<building>& b, ground a, bool rand_move = true)
 {
-	vector 初始解[8] = { vector(0.0f,0.0f),vector(0.0f,-1.0f),vector(0.0f,-2.0f),vector(1.0f,-2.0f),vector(1.0f,-1.0f),vector(-1.0f,1.0f),vector(-1.0f,-1.0f),vector(-1.0f,0.0f) };
+	vector 初始解[8] = {
+		vector(0.0f,0.0f),
+		vector(0.0f,-1.0f),
+		vector(0.0f,-2.0f),
+		vector(1.0f,-2.0f),
+		vector(1.0f,-1.0f),
+		vector(-1.0f,1.0f),
+		vector(-1.0f,-1.0f),
+		vector(-1.0f,0.0f) };
 
-	float 缩放 = (float(rand()) / RAND_MAX + 0.5f);
-	vector 平移(float(rand()) / RAND_MAX, float(rand()) / RAND_MAX);
+	//float 缩放 = (float(rand()) / RAND_MAX + 0.5f);
+
 	b = std::vector<building>(8);
 
-	float s = 0;
-	while (true)
+	float a_s = a.area();
+
+	bool l = true;
+	while (l)
 	{
-		s = 0;
+		vector 平移 = rand_move ? vector((float(rand()) / RAND_MAX - 0.5f) * 100, (float(rand()) / RAND_MAX - 0.5f) * 100) : vector(0.0f, 0.0f);
+
+		l = false;
+		float s = 0;
+		while (true)
+		{
+			s = 0;
+			for (int i = 0; i < b.size(); i++)
+			{
+				b[i].target_area = (float(rand()) / RAND_MAX + 0.01f) * a_s * 0.5f;
+				s += b[i].target_area;
+			}
+			if (((0.5f * a_s) < s) && (s < a_s))
+			{
+				break;
+			}
+		}
+
 		for (int i = 0; i < b.size(); i++)
 		{
-			b[i].target_area = (float(rand()) / RAND_MAX + 0.01f) * a_s * 0.5f;
-			s += b[i].target_area;
-		}
-		if (((0.5f * a_s) < s) && (s < a_s))
-		{
-			break;
+			float 半径 = fminf(sqrt(b[i].target_area / float(M_PI)) / 8, 40);
+			b[i].fun = i;
+			for (int j = 0; j < 20; j++)
+			{
+				b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun]) * 100) + ((vector(1.0f, 0.0f).rotate(18 * j + 45)) * 半径) + 平移);
+			}
+			b[i].site.reset_seg();
+			if (!a.site.full_overlap(b[i].site) && rand_move)
+			{
+				l = true;
+				break;
+			}
 		}
 	}
 
-	for (int i = 0; i < b.size(); i++)
-	{
-		float 半径 = sqrt(b[i].target_area / float(M_PI)) / 8;
-		b[i].fun = i;
-		for (int j = 0; j < 20; j++)
-		{
-			b[i].site[j].origin = point(vector(b[i].site[j].origin) + ((初始解[b[i].fun]) * 100) + ((vector(1.0f, 0.0f).rotate(18 * j + 45)) * 半径));
-		}
-		b[i].site.reset_seg();
-	}
+	
 }
 
 float 非法_权重 = 10;
 void 权重调整()
 {
-	std::string temp[] = { "面积_权重 = ","平直角_权重 = ","距离_权重 = ","门_权重 = ","周长_权重 = ","非法_权重 = "};
-	float* t_d[] = { &面积_权重,&平直角_权重,&距离_权重,&门_权重,&周长_权重,&非法_权重 };
-	for (int i = 0; i < 6; i++)
+	权重调整_();
+	std::string temp = "非法_权重 = ";
+	float* t_d = &非法_权重;
+
+	std::string t = temp + "%.3f\n" + temp;
+	printf(t.c_str(), *t_d);
+	float t_t;
+	int t_i = 0;
+	rewind(stdin);
+	t_i = scanf_s("%f", &t_t);
+	if (t_i == 1)
 	{
-		std::string t = temp[i] + "%.3f\n" + temp[i];
-		printf(t.c_str(), *t_d[i]);
-		float t_t;
-		int t_i = 0;
-		rewind(stdin);
-		t_i = scanf("%f", &t_t);
-		if (t_i == 1)
-		{
-			*t_d[i] = float(t_t);
-		}
-		printf("%.3f\n", *t_d[i]);
+		*t_d = float(t_t);
 	}
+	printf("%.3f\n", *t_d);
 }
 
 int main()
@@ -173,7 +194,7 @@ int main()
 			a.site.move2center();
 
 			a_s = a.area();
-			建筑重置(b, a_s);
+			建筑重置(b, a, false);
 
 			bool reset = false;
 			for (int i = 0; i < 8; i++)
@@ -219,7 +240,7 @@ int main()
 		{
 			/////////////////////////////////////////////////////////////////////////
 			std::vector<float> output;
-			output.reserve(952);
+			output.reserve(955);
 
 			std::vector<float> a_data;
 			a.data(a_data);
@@ -284,7 +305,7 @@ int main()
 			{
 				G_.push_back(分数);
 				r_times = 0;
-				建筑重置(b, a_s);
+				建筑重置(b, a);
 				a.door[0] = rand() % 20;
 				a.door[1] = rand() % 20;
 				{
@@ -300,14 +321,14 @@ int main()
 				r_times = 0;
 				a.door[0] = rand() % 20;
 				a.door[1] = rand() % 20;
-				建筑重置(b, a_s);
+				建筑重置(b, a);
 				{
 					bool temp;
 					分数 = 奖励函数(a, b, temp);
 				}
 			}
 
-			if ((loops % 10) == 0)
+			if ((loops % 1) == 0)
 			{
 				p = cv::Mat::zeros(h, w, CV_8UC3);
 				a.print(p, 比例, cv::Scalar(255, 255, 255));
@@ -334,7 +355,7 @@ int main()
 					G_.push_back(分数);
 					a.door[0] = rand() % 20;
 					a.door[1] = rand() % 20;
-					建筑重置(b, a_s);
+					建筑重置(b, a);
 					{
 						bool temp;
 						分数 = 奖励函数(a, b, temp);
@@ -364,7 +385,7 @@ int main()
 					G_.push_back(分数);
 					a.door[0] = rand() % 20;
 					a.door[1] = rand() % 20;
-					建筑重置(b, a_s);
+					建筑重置(b, a);
 					{
 						bool temp;
 						分数 = 奖励函数(a, b, temp);
@@ -375,7 +396,7 @@ int main()
 
 
 			loops++;
-			if (loops >= 10000)
+			if (loops >= 2000)
 			{
 				G_.push_back(分数);
 				G_pipe.send(G_);
